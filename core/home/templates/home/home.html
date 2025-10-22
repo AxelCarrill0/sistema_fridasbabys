@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Inicio - Fridas Babys</title>
-</head>
-<body>
+{% extends "home/base.html" %}
+
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
     <h1>Bienvenido a Fridas Babys</h1>
     <p>Desde aquí puedes acceder a las diferentes secciones:</p>
     <ul>
         <li><a href="{% url 'usuarios:lista' %}">Usuarios</a></li>
         <li><a href="#">Productos</a></li>
         <li><a href="#">Pedidos</a></li>
-        <!-- Agrega los enlaces a las demás apps cuando estén listas -->
     </ul>
-</body>
-</html>
+{% endblock %}
