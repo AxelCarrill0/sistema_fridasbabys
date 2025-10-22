@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Fridas Babys - {% block titulo %}{% endblock %}</title>
+    <style>
+        /* ESTILOS TEMPORALES para replicar tu captura */
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #ffe6e6; } /* Color de fondo ligero */
+        .navbar {
+            background-color: #ffcccc; /* Color rosa de la barra de navegación */
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            font-weight: bold;
+            font-size: 20px;
+            color: #333; /* O el color que desees para el logo */
+            margin-right: 30px;
+            text-decoration: none;
+        }
+        .nav-link {
+            text-decoration: none;
+            color: #333;
+            margin-right: 15px;
+            padding: 5px 10px;
+        }
+        .content-area {
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="{% url 'home:index' %}" class="logo">Fridas Babys</a>
+        <a href="{% url 'usuarios:lista' %}" class="nav-link">Usuarios</a>
+        <a href="{% url 'home:index' %}" class="nav-link">Home</a>
+    </div>
+
+    <div class="content-area">
+        {% block contenido %}
+            {% endblock %}
+    </div>
+
+    </body>
+</html>
