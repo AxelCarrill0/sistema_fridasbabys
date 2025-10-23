@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Editar Usuario</title>
+</head>
+<body>
+    <h1>Editar Usuario</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Nombre:</label><br>
+        <input type="text" name="nombre" value="{{ usuario.nombre }}" required><br>
+
+        <label>Correo:</label><br>
+        <input type="email" name="correo" value="{{ usuario.correo }}" required><br>
+
+        <label>Teléfono:</label><br>
+        <input type="text" name="telefono" value="{{ usuario.telefono }}" required><br>
+
+        <label>Dirección:</label><br>
+        <textarea name="direccion" required>{{ usuario.direccion }}</textarea><br>
+
+        <label>Rol:</label><br>
+        <select name="rol">
+            <option value="cliente" {% if usuario.rol == 'cliente' %}selected{% endif %}>Cliente</option>
+            <option value="vendedor" {% if usuario.rol == 'vendedor' %}selected{% endif %}>Vendedor</option>
+            <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
+        </select><br><br>
+
+        <button type="submit">Guardar Cambios</button>
+    </form>
+
+    <a href="{% url 'usuarios:lista' %}">← Volver al listado</a>
+</body>
+</html>
