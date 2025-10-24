@@ -1,0 +1,45 @@
+<!-- <h1>{{ titulo }}</h1>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Guardar</button>
+</form>
+<a href="{% url 'usuarios:lista' %}">Volver</a> -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Crear Usuario</title>
+</head>
+<body>
+    <h1>Registrar nuevo usuario</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Nombre:</label><br>
+        <input type="text" name="nombre" required><br>
+
+        <label>Correo:</label><br>
+        <input type="email" name="correo" required><br>
+
+        <label>Teléfono:</label><br>
+        <input type="text" name="telefono" required><br>
+
+        <label>Dirección:</label><br>
+        <textarea name="direccion" required></textarea><br>
+
+        <label>Rol:</label><br>
+        <select name="rol">
+            <option value="cliente">Cliente</option>
+            <option value="vendedor">Vendedor</option>
+            <option value="admin">Administrador</option>
+        </select><br><br>
+
+        <button type="submit">Guardar</button>
+    </form>
+
+    <a href="{% url 'usuarios:lista' %}">← Volver al listado</a>
+</body>
+</html>
+

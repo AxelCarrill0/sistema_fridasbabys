@@ -58,7 +58,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bd_sistema_fb',
         'USER': 'postgres',
-        'PASSWORD': 'A001',
+        'PASSWORD': 'Alex2',
         'HOST': 'localhost',
         'PORT': '5432',
     }
