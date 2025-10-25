@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from core.usuarios.facade.usuario_facade import UsuarioFacade
 from core.usuarios.models import Usuario
+from django.contrib.auth.decorators import login_required
 
 facade = UsuarioFacade()
 
+@login_required
 def listar_usuarios(request):
     usuarios = facade.listar_usuarios()
     return render(request, "usuarios/listar.html", {"usuarios": usuarios})
 
+@login_required
 def crear_usuario(request):
     if request.method == "POST":
         nombre = request.POST["nombre"]
@@ -21,6 +24,7 @@ def crear_usuario(request):
 
     return render(request, "usuarios/crear.html")
 
+@login_required
 def editar_usuario(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
 
@@ -35,6 +39,7 @@ def editar_usuario(request, pk):
 
     return render(request, "usuarios/editar.html", {"usuario": usuario})
 
+@login_required
 def eliminar_usuario(request, pk):
     usuario = get_object_or_404(Usuario, pk=pk)
     usuario.delete()
