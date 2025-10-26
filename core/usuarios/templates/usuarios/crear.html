@@ -1,45 +1,35 @@
-<!-- <h1>{{ titulo }}</h1>
-<form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Guardar</button>
-</form>
-<a href="{% url 'usuarios:lista' %}">Volver</a> -->
+{% extends "home/base.html" %} 
+{% block titulo %}Crear Usuario{% endblock %}
 
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Crear Usuario</title>
-</head>
-<body>
-    <h1>Registrar nuevo usuario</h1>
+{% block contenido %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card form-card shadow p-4">
+                <h1 class="card-title text-center mb-4 form-title">Registrar nuevo usuario</h1>
 
-    <form method="post">
-        {% csrf_token %}
-        <label>Nombre:</label><br>
-        <input type="text" name="nombre" required><br>
+                <form method="post">
+                    {% csrf_token %}
 
-        <label>Correo:</label><br>
-        <input type="email" name="correo" required><br>
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
 
-        <label>Teléfono:</label><br>
-        <input type="text" name="telefono" required><br>
+                    <button type="submit" class="btn submit-button w-100 mt-3">Guardar</button>
+                </form>
 
-        <label>Dirección:</label><br>
-        <textarea name="direccion" required></textarea><br>
-
-        <label>Rol:</label><br>
-        <select name="rol">
-            <option value="cliente">Cliente</option>
-            <option value="vendedor">Vendedor</option>
-            <option value="admin">Administrador</option>
-        </select><br><br>
-
-        <button type="submit">Guardar</button>
-    </form>
-
-    <a href="{% url 'usuarios:lista' %}">← Volver al listado</a>
-</body>
-</html>
-
+                <div class="text-center mt-3">
+                    <a href="{% url 'usuarios:lista' %}" class="back-link">← Volver al listado</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>...</style>
+{% endblock %}

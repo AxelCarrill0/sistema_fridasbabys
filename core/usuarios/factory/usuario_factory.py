@@ -2,17 +2,22 @@ from core.usuarios.models import Usuario
 
 class UsuarioFactory:
     """
-    Crea usuarios según su rol usando el patrón Factory Method.
+    Patron Factory
+
+    Gestiona la creación de instancias de Usuario
     """
+
     @staticmethod
-    def crear_usuario(nombre, correo, telefono, direccion, rol="cliente"):
-        # Crea el usuario directamente
-        usuario = Usuario(
-            nombre=nombre,
-            correo=correo,
-            telefono=telefono,
-            direccion=direccion,
-            rol=rol
+    def crear_usuario(**datos):
+
+        if 'username' not in datos or 'password' not in datos:
+            raise ValueError("Se requieren 'username' y 'password' para crear un usuario.")
+
+        usuario = Usuario.objects.create_user(
+            username=datos.pop('username'),
+            password=datos.pop('password'),
+            **datos  # Esta parte indica que los otros campos o atributos de la tabla se
+                     # extraen del metodo de Django
         )
-        usuario.save()
+
         return usuario

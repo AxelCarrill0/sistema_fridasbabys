@@ -2,27 +2,106 @@
 {% block titulo %}Lista de Usuarios{% endblock %}
 
 {% block contenido %}
-    <h1>Usuarios</h1>
-    <a href="{% url 'usuarios:crear' %}">Crear Nuevo Usuario</a>
-    <table border="1">
-        <tr>
-            <th>Nombre</th>
-            <th>Correo</th>
-            <th>Teléfono</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-        </tr>
-        {% for u in usuarios %}
-        <tr>
-            <td>{{ u.nombre }}</td>
-            <td>{{ u.correo }}</td>
-            <td>{{ u.telefono }}</td>
-            <td>{{ u.rol }}</td>
-            <td>
-                <a href="{% url 'usuarios:editar' u.id %}">Editar</a>
-                <a href="{% url 'usuarios:eliminar' u.id %}">Eliminar</a>
-            </td>
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="container mt-4">
+        <h1 class="page-title">Usuarios</h1>
+
+        <div class="mb-3 d-flex justify-content-end">
+            <a href="{% url 'usuarios:crear' %}" class="btn create-button">
+                <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
+            </a>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-striped table-hover user-table">
+                <thead class="table-dark-custom">
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Rol</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in usuarios %}
+                    <tr>
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.nombre }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>{{ u.telefono }}</td>
+                        <td>{{ u.rol }}</td>
+                        <td>
+                            <a href="{% url 'usuarios:editar' u.id %}" class="btn btn-sm action-link edit-link">Editar</a>
+                            <a href="{% url 'usuarios:eliminar' u.id %}" class="btn btn-sm action-link delete-link">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <style>
+        .page-title {
+            color: #4a4e69; /* Título oscuro */
+            margin-bottom: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .create-button {
+            background-color: #5d677a; /* Color secundario para el botón */
+            border-color: #5d677a;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .create-button:hover {
+            background-color: #4a4e69;
+            border-color: #4a4e69;
+            color: white;
+        }
+
+        .table-dark-custom {
+            background-color: #4a4e69; /* Color oscuro de cabecera */
+            color: white;
+        }
+
+        .user-table {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra para resaltar la tabla */
+            background-color: white; /* Fondo blanco para las celdas */
+            border-radius: 8px;
+            overflow: hidden; /* Para que el borde redondeado se aplique */
+        }
+
+        .action-link {
+            padding: 2px 8px;
+            margin: 0 2px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid transparent;
+        }
+
+        .edit-link {
+            color: #4a4e69;
+            border-color: #4a4e69;
+        }
+
+        .edit-link:hover {
+            background-color: #4a4e69;
+            color: white;
+        }
+
+        .delete-link {
+            color: #dc3545; /* Rojo de Bootstrap para Eliminar */
+            border-color: #dc3545;
+        }
+
+        .delete-link:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
 {% endblock %}

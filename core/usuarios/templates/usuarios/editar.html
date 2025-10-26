@@ -1,36 +1,35 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Editar Usuario</title>
-</head>
-<body>
-    <h1>Editar Usuario</h1>
+{% extends "home/base.html" %} 
+{% block titulo %}Editar Usuario{% endblock %}
 
-    <form method="post">
-        {% csrf_token %}
-        <label>Nombre:</label><br>
-        <input type="text" name="nombre" value="{{ usuario.nombre }}" required><br>
+{% block contenido %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card form-card shadow p-4">
+                <h1 class="card-title text-center mb-4 form-title">Editar Usuario</h1>
 
-        <label>Correo:</label><br>
-        <input type="email" name="correo" value="{{ usuario.correo }}" required><br>
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}:</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <div class="text-danger">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    {% endfor %}
 
-        <label>Teléfono:</label><br>
-        <input type="text" name="telefono" value="{{ usuario.telefono }}" required><br>
+                    <button type="submit" class="btn submit-button w-100 mt-3">Guardar Cambios</button>
+                </form>
 
-        <label>Dirección:</label><br>
-        <textarea name="direccion" required>{{ usuario.direccion }}</textarea><br>
-
-        <label>Rol:</label><br>
-        <select name="rol">
-            <option value="cliente" {% if usuario.rol == 'cliente' %}selected{% endif %}>Cliente</option>
-            <option value="vendedor" {% if usuario.rol == 'vendedor' %}selected{% endif %}>Vendedor</option>
-            <option value="admin" {% if usuario.rol == 'admin' %}selected{% endif %}>Administrador</option>
-        </select><br><br>
-
-        <button type="submit">Guardar Cambios</button>
-    </form>
-
-    <a href="{% url 'usuarios:lista' %}">← Volver al listado</a>
-</body>
-</html>
+                <div class="text-center mt-3">
+                    <a href="{% url 'usuarios:lista' %}" class="back-link">← Volver al listado</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <style>...</style>
+{% endblock %}

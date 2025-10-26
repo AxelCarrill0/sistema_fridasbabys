@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -20,7 +21,6 @@ INSTALLED_APPS = [
     'core.pedidos.apps.PedidosConfig',
     'core.pagos.apps.PagosConfig',
     'core.productos.apps.ProductosConfig',
-    'core.erp.apps.ErpConfig',
     'core.home.apps.HomeConfig',
 ]
 
@@ -58,7 +58,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bd_sistema_fb',
         'USER': 'postgres',
-        'PASSWORD': 'Alex2',
+        'PASSWORD': 'A001',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -78,9 +78,15 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Autenticación
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+AUTH_USER_MODEL = 'usuarios.Usuario'

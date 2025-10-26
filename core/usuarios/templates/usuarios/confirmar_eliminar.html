@@ -1,7 +1,55 @@
-<h1>Eliminar Usuario</h1>
-<p>¿Estás seguro que quieres eliminar a "{{ usuario.nombre }}"?</p>
-<form method="post">
-    {% csrf_token %}
-    <button type="submit">Sí, eliminar</button>
-</form>
-<a href="{% url 'usuarios:lista' %}">Cancelar</a>
+{% extends "home/base.html" %} 
+{% block titulo %}Eliminar Usuario{% endblock %}
+
+{% block contenido %}
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 col-lg-5">
+            <div class="card form-card shadow p-4 text-center">
+                <h1 class="card-title mb-4 form-title">Eliminar Usuario</h1>
+                
+                <p class="mb-4 lead">¿Estás seguro que quieres eliminar a <strong>"{{ usuario.nombre }}"</strong>?</p>
+                
+                <form method="post" class="d-grid gap-2">
+                    {% csrf_token %}
+                    <button type="submit" class="btn delete-button">Sí, eliminar</button>
+                    <a href="{% url 'usuarios:lista' %}" class="btn btn-secondary cancel-button">Cancelar</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .form-card {
+            background-color: #fff; 
+            border: none;
+            border-radius: 8px;
+        }
+        .form-title {
+            color: #dc3545; /* Título rojo para advertencia */
+            font-weight: bold;
+        }
+        .delete-button {
+            background-color: #dc3545; /* Rojo de eliminación */
+            border-color: #dc3545;
+            color: white;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+            border-color: #c82333;
+            color: white;
+        }
+        .cancel-button {
+            background-color: #5d677a; /* Color secundario para cancelar */
+            border-color: #5d677a;
+            color: white;
+        }
+        .cancel-button:hover {
+            background-color: #4a4e69;
+            border-color: #4a4e69;
+            color: white;
+        }
+        .lead {
+            color: #4a4e69;
+        }
+    </style>
+{% endblock %}

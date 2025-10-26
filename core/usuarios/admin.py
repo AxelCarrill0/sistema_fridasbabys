@@ -3,6 +3,9 @@ from .models import Usuario
 
 @admin.register(Usuario)
 class UsuarioAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'correo', 'telefono', 'rol')
+
+    list_display = ('username', 'nombre', 'email', 'telefono', 'rol')
+
     list_filter = ('rol',)
-    search_fields = ('nombre', 'correo')
+
+    search_fields = ('username', 'nombre', 'email')
