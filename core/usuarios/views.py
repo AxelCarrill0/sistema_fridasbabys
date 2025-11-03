@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from core.usuarios.facade.usuario_facade import UsuarioFacade
 from core.usuarios.models import Usuario
 from django.contrib.auth.decorators import login_required
-from .forms import UsuarioCreationForm, UsuarioChangeForm
+from .forms import UsuarioCreationForm, UsuarioChangeForm, ClienteRegistrationForm
 from django.contrib.auth import authenticate, login, logout
 
 facade = UsuarioFacade()
@@ -86,3 +86,20 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+#con esta vista registramos  nuevos usuarios con rol 'cliente'.
+def register_client(request):
+
+    if request.user.is_authenticated:
+        return redirect('home:home')
+
+    if request.method == 'POST':
+        form = ClienteRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Opcional: Autenticar e iniciar sesión al nuevo cliente automáticamente
+            # login(request, user)
+            return redirect('login')
+    else:
+        form = ClienteRegistrationForm()
+    return render(request, 'usuarios/registro.html', {'form': form})

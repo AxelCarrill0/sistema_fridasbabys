@@ -97,7 +97,7 @@
 
             {% else %}
                 <a href="{% url 'login' %}" class="logout-button">Iniciar Sesión</a>
-                <a href="#" class="logout-button" style="margin-left: 5px;">Registrarme</a> {% endif %}
+                <a href="{% url 'usuarios:registrar_cliente' %}" class="logout-button" style="margin-left: 5px;">Registrarme</a> {% endif %}
         </div>
     </div>
 
