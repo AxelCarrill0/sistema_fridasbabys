@@ -10,7 +10,6 @@ class ProductoFacade:
     def __init__(self):
         subject_producto.adjuntar(InventarioObserver())
 
-    # MÉTODO LISTAR CON FILTRO (DDSG-63)
     def listar_productos(self, query=None):
         queryset = Producto.objects.all()
 
