@@ -1,0 +1,38 @@
+{% extends "home/base.html" %}
+{% block title %}Confirmar Eliminación{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+            <div class="card border-danger shadow-lg">
+                <div class="card-header bg-danger text-white">
+                    <h3 class="mb-0">Confirmar Eliminación</h3>
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center">
+                        ¿Estás absolutamente seguro(a) que deseas eliminar el producto:
+                        <br>
+                        **"{{ producto.nombre }}"**?
+                    </p>
+                    <p class="text-danger text-center">
+                        ¡Esta acción es irreversible y afectará el inventario!
+                    </p>
+
+                    <form method="post" action="{% url 'productos:eliminar' producto.pk %}" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-danger btn-lg">
+                                Sí, Eliminar Permanentemente
+                            </button>
+                            <a href="{% url 'productos:lista' %}" class="btn btn-secondary">
+                                No, Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

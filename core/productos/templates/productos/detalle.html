@@ -1,0 +1,93 @@
+{% extends "home/base.html" %}
+{% block titulo %}Detalle: {{ producto.nombre }}{% endblock %}
+
+{% load humanize %}
+{% load mathfilters %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0 text-center">{{ producto.nombre }}</h2>
+                </div>
+                <div class="card-body p-5">
+
+                    <div class="row">
+                        <div class="col-md-5 text-center mb-4">
+                            <i class="fas fa-box fa-10x text-muted border p-4 rounded"></i>
+                            <p class="text-muted mt-2">Imagen no disponible</p>
+                        </div>
+
+                        <div class="col-md-7">
+                            <h4 class="mb-3">Información General</h4>
+                            <p class="lead">{{ producto.descripcion|default:"No hay descripción disponible para este producto." }}</p>
+
+                            <hr>
+
+                            <div class="price-section mb-4">
+                                <h5 class="text-muted mb-2">Precio Base:</h5>
+                                <h3 class="base-price">
+                                    <span class="text-decoration-line-through">${{ producto.precio }}</span>
+                                </h3>
+
+                                <h5 class="text-success mb-2">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h5>
+                                <h1 class="display-4 text-success fw-bold">
+                                    ${{ precio_promocional }}
+                                </h1>
+                                <span class="badge bg-warning text-dark">¡Ahorras ${{ producto.precio|sub:precio_promocional }}!</span>
+                            </div>
+
+                            <hr>
+
+                            <div class="details-grid">
+                                <div><strong>Stock:</strong>
+                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">{{ producto.stock }} unidades</span>
+                                </div>
+
+                                <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
+
+                                <div><strong>Estado:</strong>
+                                    {% if producto.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactivo</span>
+                                    {% endif %}
+                                </div>
+                                <div><strong>Última Actualización:</strong> {{ producto.fecha_actualizacion|date:"d M, Y H:i" }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 text-center">
+                        <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-warning btn-lg me-2">
+                            <i class="fas fa-edit"></i> Editar Producto
+                        </a>
+                        <a href="{% url 'productos:lista' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Volver al Listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header.bg-primary {
+        background-color: #5d677a !important;
+    }
+    .base-price {
+        font-size: 1.5rem;
+        color: #888;
+    }
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        text-align: left;
+    }
+</style>
+
+{% endblock %}
