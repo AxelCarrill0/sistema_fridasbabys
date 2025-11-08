@@ -1,0 +1,69 @@
+{% extends "home/base.html" %}
+{% block titulo %}Crear Producto{% endblock %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0 text-center">Registrar Nuevo Producto</h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post">
+                        {% csrf_token %}
+
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-3">
+                                **Por favor, corrige los siguientes errores:**
+                                {% for error in form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+
+                        {% for field in form %}
+                            <div class="mb-3 {% if field.field.widget.input_type == 'checkbox' %}form-check{% endif %}">
+
+                                {% if field.field.widget.input_type != 'checkbox' %}
+                                    <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                                    {{ field }}
+
+                                    {% if field.help_text %}
+                                        <div class="form-text text-muted">{{ field.help_text }}</div>
+                                    {% endif %}
+                                {% else %}
+                                    {{ field }}
+                                    <label class="form-check-label fw-bold" for="{{ field.id_for_label }}">
+                                        {{ field.label }}
+                                    </label>
+                                {% endif %}
+
+                                {% for error in field.errors %}
+                                    <div class="invalid-feedback d-block">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-save"></i> Guardar Producto
+                            </button>
+                            <a href="{% url 'productos:lista' %}" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos adicionales para mejorar la presentación */
+    .card-header.bg-success {
+        background-color: #5d677a !important; /* Color consistente con tu tema */
+    }
+</style>
+{% endblock %}
