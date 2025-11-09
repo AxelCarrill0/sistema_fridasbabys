@@ -22,7 +22,7 @@ INSTALLED_APPS = [
     'core.pagos.apps.PagosConfig',
     'core.productos.apps.ProductosConfig',
     'core.home.apps.HomeConfig',
-'core.compras.apps.ComprasConfig',
+    'core.compras.apps.ComprasConfig',
 
 
 # NUEVAS LIBRERÍAS DE FILTRO Y CORE
@@ -65,7 +65,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'bd_sistema_fb',
         'USER': 'postgres',
-        'PASSWORD': '1234',
+        'PASSWORD': 'A001',
         'HOST': 'localhost',
         'PORT': '5432',
     }
