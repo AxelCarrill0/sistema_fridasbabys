@@ -12,5 +12,6 @@ urlpatterns = [
     path('productos/', include('core.productos.urls', namespace='productos')),
 
     path('usuarios/', include('core.usuarios.urls', namespace='usuarios')),
-    # path('pedidos/', include('core.pedidos.urls', namespace='pedidos')),
+
+    path('pedidos/', include('core.pedidos.urls', namespace='pedidos')),
 ]
