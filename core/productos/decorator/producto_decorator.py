@@ -40,8 +40,7 @@ class DescuentoPorcentajeDecorator(ProductoDecorator):
         self._porcentaje_descuento = porcentaje_descuento
 
     def get_precio_final(self):
-        precio_base = self.get_precio_base()
-
+        precio_base = decimal.Decimal(str(self.get_precio_base()))  # Convierte float a Decimal si es necesario
         factor_descuento = (decimal.Decimal('100') - self._porcentaje_descuento) / decimal.Decimal('100')
         precio_con_descuento = precio_base * factor_descuento
 

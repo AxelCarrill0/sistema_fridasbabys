@@ -1,46 +1,98 @@
-{% extends base_template %}
+{% extends "home/base_cliente.html" %}
 {% load humanize %}
+{% load mathfilters %}
 
-{% block content %}
+{% block contenido %}
 <div class="container my-5">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-body p-4">
             <h2 class="text-center mb-4">🧾 Mis Pedidos</h2>
 
-            {% if pedidos %}
+            <!-- PEDIDOS PENDIENTES -->
+            {% if pendientes %}
+                <h3>Pedidos Pendientes</h3>
                 <div class="row g-4">
-                    {% for pedido in pedidos %}
+                    {% for detalle in pendientes %}
                     <div class="col-md-6 col-lg-4">
                         <div class="card h-100 border-0 shadow-sm rounded-4">
                             <div class="card-body">
-                                <h5 class="card-title text-center mb-3">
-                                    Pedido #{{ pedido.id }}
-                                </h5>
-                                <p><strong>Producto:</strong> {{ pedido.producto.nombre }}</p>
-                                <p><strong>Cantidad:</strong> {{ pedido.cantidad }}</p>
-                                <p><strong>Fecha:</strong> {{ pedido.fecha_pedido|date:"d/m/Y" }}</p>
-                                <p>
-                                    <strong>Estado:</strong>
-                                    <span class="badge
-                                        {% if pedido.estado == 'pendiente' %} bg-warning text-dark
-                                        {% elif pedido.estado == 'en_proceso' %} bg-info
-                                        {% elif pedido.estado == 'enviado' %} bg-primary
-                                        {% elif pedido.estado == 'entregado' %} bg-success
-                                        {% else %} bg-secondary {% endif %}">
-                                        {{ pedido.get_estado_display }}
-                                    </span>
-                                </p>
+                                <h5 class="card-title text-center mb-3">Pedido #{{ detalle.pedido.id }}</h5>
+                                <p><strong>Producto:</strong> {{ detalle.pedido.producto.nombre }}</p>
+                                <p><strong>Cantidad:</strong> {{ detalle.pedido.cantidad }}</p>
+                                <p><strong>Precio unitario:</strong> ${{ detalle.precio_final|floatformat:2 }}</p>
+                                <p><strong>Subtotal:</strong> ${{ detalle.subtotal|floatformat:2 }}</p>
+                                <p><strong>Fecha:</strong> {{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
+
+                                <div class="d-flex justify-content-between mt-3">
+                                    <a href="{% url 'pedidos:editar_pedido' detalle.pedido.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
+                                    <a href="{% url 'pedidos:cancelar_pedido' detalle.pedido.id %}" class="btn btn-sm btn-danger">🗑 Cancelar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="col-12 mt-4 text-end">
+                        <h4>Total Pendientes: ${{ total_pendientes|floatformat:2 }}</h4>
+                        <!-- Botón abrir modal de confirmación -->
+                        <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#confirmarCompraModal">
+                            🛒 Confirmar Compra
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Modal de confirmación de compra -->
+                <div class="modal fade" id="confirmarCompraModal" tabindex="-1" aria-labelledby="confirmarCompraModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmarCompraModalLabel">Confirmar Compra</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                            </div>
+                            <div class="modal-body">
+                                ¿Estás seguro de que deseas confirmar la compra por un total de <strong>${{ total_pendientes|floatformat:2 }}</strong>?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <form method="post" action="{% url 'pedidos:confirmar_compra' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">Sí, Confirmar</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <p>No tienes pedidos pendientes.</p>
+            {% endif %}
+
+            <!-- PEDIDOS ENVIADOS / CONFIRMADOS -->
+            {% if enviados %}
+                <h3 class="mt-5">Pedidos Enviados / Confirmados</h3>
+                <div class="row g-4">
+                    {% for detalle in enviados %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-3">Pedido #{{ detalle.pedido.id }}</h5>
+                                <p><strong>Producto:</strong> {{ detalle.pedido.producto.nombre }}</p>
+                                <p><strong>Cantidad:</strong> {{ detalle.pedido.cantidad }}</p>
+                                <p><strong>Precio unitario:</strong> ${{ detalle.precio_final|floatformat:2 }}</p>
+                                <p><strong>Subtotal:</strong> ${{ detalle.subtotal|floatformat:2 }}</p>
+                                <p><strong>Fecha:</strong> {{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                                <p><strong>Estado:</strong> {{ detalle.pedido.get_estado_display }}</p>
                             </div>
                         </div>
                     </div>
                     {% endfor %}
                 </div>
-            {% else %}
-                <div class="text-center py-5">
-                    <h5 class="text-muted">Aún no tienes pedidos realizados.</h5>
-                    <a href="{% url 'catalogo' %}" class="btn btn-dark mt-3">🛒 Ir al Catálogo</a>
-                </div>
             {% endif %}
+
+            <!-- Ir al catálogo -->
+            <div class="mt-4 text-center">
+                <a href="{% url 'productos:catalogo' %}" class="btn btn-dark">Seguir Comprando</a>
+            </div>
+
         </div>
     </div>
 </div>

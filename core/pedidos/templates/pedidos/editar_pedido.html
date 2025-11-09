@@ -1,0 +1,29 @@
+{% extends "home/base_cliente.html" %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">Editar Pedido #{{ pedido.id }}</h2>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="producto" class="form-label">Producto</label>
+                    <input type="text" class="form-control" id="producto" value="{{ producto.nombre }}" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="cantidad" class="form-label">Cantidad</label>
+                    <input type="number" class="form-control" id="cantidad" name="cantidad" value="{{ pedido.cantidad }}" min="1" max="{{ producto.stock }}">
+                    <small class="text-muted">Stock disponible: {{ producto.stock }}</small>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-secondary">Cancelar</a>
+                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
