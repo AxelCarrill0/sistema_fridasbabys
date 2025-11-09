@@ -1,0 +1,102 @@
+{% extends "home/base_cliente.html" %}
+{% block titulo %}Detalle: {{ producto.nombre }}{% endblock %}
+{% load humanize %}
+{% load mathfilters %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h2 class="mb-0">{{ producto.nombre }}</h2>
+                </div>
+
+                <div class="card-body p-5">
+                    <div class="row">
+                        <!-- Columna de imagen y botón -->
+                        <div class="col-md-5 text-center mb-4 d-flex flex-column align-items-center">
+                            {% if producto.imagen %}
+                                <img src="{{ producto.imagen.url }}" class="img-fluid rounded shadow-sm mb-4" alt="{{ producto.nombre }}">
+                            {% else %}
+                                <i class="fas fa-box fa-10x text-muted border p-4 rounded mb-4"></i>
+                                <p class="text-muted">Imagen no disponible</p>
+                            {% endif %}
+
+                            <!-- Formulario debajo de la imagen -->
+                            {% if user.is_authenticated %}
+                                <form method="post" action="" class="d-flex align-items-center justify-content-center gap-3">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="producto_id" value="{{ producto.id }}">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-shopping-cart"></i> Añadir
+                                    </button>
+                                    <div>
+                                        <label for="cantidad" class="form-label mb-1"><strong>Cantidad:</strong></label>
+                                        <input type="number" name="cantidad" id="cantidad" value="1" min="1"
+                                            max="{{ producto.stock }}" class="form-control text-center" style="width: 100px;">
+                                    </div>
+                                </form>
+                            {% else %}
+                                <p class="text-danger mt-3">Inicia sesión para comprar este producto.</p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Columna de información -->
+                        <div class="col-md-7">
+                            <h4 class="mb-3">Información General</h4>
+                            <p class="lead">{{ producto.descripcion|default:"No hay descripción disponible." }}</p>
+                            <hr>
+
+                            <div class="price-section mb-4">
+                                <h5 class="text-muted mb-2">Precio Base:</h5>
+                                <h3 class="base-price text-decoration-line-through text-secondary">
+                                    ${{ producto.precio }}
+                                </h3>
+
+                                <h5 class="text-success mb-2">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h5>
+                                <h1 class="display-5 text-success fw-bold">
+                                    ${{ precio_promocional }}
+                                </h1>
+                                <span class="badge bg-warning text-dark">
+                                    ¡Ahorras ${{ producto.precio|sub:precio_promocional }}!
+                                </span>
+                            </div>
+
+                            <hr>
+                            <div class="details-grid mb-4">
+                                <div><strong>Stock:</strong>
+                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">
+                                        {{ producto.stock }} unidades
+                                    </span>
+                                </div>
+                                <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 text-center">
+                        <a href="{% url 'productos:catalogo' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-arrow-left"></i> Volver al Catálogo
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header.bg-primary {
+        background-color: #5d677a !important;
+    }
+    .base-price {
+        font-size: 1.3rem;
+    }
+    .details-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+</style>
+{% endblock %}

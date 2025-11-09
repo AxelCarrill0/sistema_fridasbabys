@@ -103,3 +103,27 @@ def register_client(request):
     else:
         form = ClienteRegistrationForm()
     return render(request, 'usuarios/registro.html', {'form': form})
+
+def login_view(request):
+    if request.user.is_authenticated:
+        # Redirigir según rol
+        if request.user.is_staff:
+            return redirect('home:home')       # Admin o staff
+        else:
+            return redirect('home:cliente_home')  # Cliente
+
+    error_message = None
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            if user.is_staff:
+                return redirect('home:home')
+            else:
+                return redirect('home:cliente_home')
+        else:
+            error_message = "Usuario o contraseña incorrectos."
+
+    return render(request, 'usuarios/../../templates/registration/login.html', {'error_message': error_message})

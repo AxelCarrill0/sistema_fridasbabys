@@ -1,0 +1,47 @@
+{% extends base_template %}
+{% load humanize %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-body p-4">
+            <h2 class="text-center mb-4">🧾 Mis Pedidos</h2>
+
+            {% if pedidos %}
+                <div class="row g-4">
+                    {% for pedido in pedidos %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 border-0 shadow-sm rounded-4">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-3">
+                                    Pedido #{{ pedido.id }}
+                                </h5>
+                                <p><strong>Producto:</strong> {{ pedido.producto.nombre }}</p>
+                                <p><strong>Cantidad:</strong> {{ pedido.cantidad }}</p>
+                                <p><strong>Fecha:</strong> {{ pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                                <p>
+                                    <strong>Estado:</strong>
+                                    <span class="badge
+                                        {% if pedido.estado == 'pendiente' %} bg-warning text-dark
+                                        {% elif pedido.estado == 'en_proceso' %} bg-info
+                                        {% elif pedido.estado == 'enviado' %} bg-primary
+                                        {% elif pedido.estado == 'entregado' %} bg-success
+                                        {% else %} bg-secondary {% endif %}">
+                                        {{ pedido.get_estado_display }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-5">
+                    <h5 class="text-muted">Aún no tienes pedidos realizados.</h5>
+                    <a href="{% url 'catalogo' %}" class="btn btn-dark mt-3">🛒 Ir al Catálogo</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

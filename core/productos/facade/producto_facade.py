@@ -8,6 +8,7 @@ from django.db.models import Q
 class ProductoFacade:
 
     def __init__(self):
+        # Adjuntamos el observador de inventario
         subject_producto.adjuntar(InventarioObserver())
 
     def listar_productos(self, query=None):
@@ -22,8 +23,11 @@ class ProductoFacade:
 
         return queryset.order_by('id')
 
-    def crear_producto(self, **datos):
-        return ProductoFactory.crear_producto(**datos)
+    def crear_producto(self, creado_por=None, **datos):
+        """
+        Crea un producto usando la Factory y asigna quien lo creó.
+        """
+        return ProductoFactory.crear_producto(creado_por=creado_por, **datos)
 
     def obtener_producto(self, id_producto):
         return Producto.objects.get(id=id_producto)
