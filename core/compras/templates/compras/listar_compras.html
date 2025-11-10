@@ -1,0 +1,100 @@
+{% extends "home/base.html" %}
+
+{% block contenido %}
+<div class="container mt-5">
+    <h2 class="text-center mb-5 text-brown fw-bold">Pedidos Pendientes de Confirmación</h2>
+
+    {% if pedidos %}
+        <div class="row justify-content-center g-4">
+            {% for pedido in pedidos %}
+            <div class="col-sm-6 col-md-4 col-lg-3">
+                <div class="card pedido-card shadow-sm border-0 rounded-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between p-4">
+
+                        <div>
+                            <h5 class="card-title text-center text-brown fw-bold mb-3">
+                                Pedido #{{ pedido.id }}
+                            </h5>
+                            <ul class="list-unstyled mb-3" style="font-size: 1rem;">
+                                <li><strong>Cliente:</strong> {{ pedido.cliente.username }}</li>
+                                <li><strong>Producto:</strong> {{ pedido.producto.nombre }}</li>
+                                <li><strong>Cantidad:</strong> {{ pedido.cantidad }}</li>
+                                <li><strong>Fecha:</strong> {{ pedido.fecha_pedido|date:"d/m/Y" }}</li>
+                                <li><strong>Estado:</strong> {{ pedido.get_estado_display }}</li>
+                            </ul>
+                        </div>
+
+                        <form method="post" action="{% url 'compras:confirmar' pedido.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-brown w-100 fw-semibold mt-2">
+                                Marcar como Entregado
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center fs-5 fw-semibold text-brown mt-5">No hay pedidos para confirmar.</p>
+    {% endif %}
+</div>
+
+<!-- Estilos -->
+<style>
+body {
+    background-color: #d8c3a5; /* Fondo beige coherente */
+    font-size: 1.1rem;
+    color: #2e2e2e;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Marrón principal */
+.text-brown {
+    color: #5a3825;
+}
+
+/* Tarjeta de pedido */
+.pedido-card {
+    background-color: #ffffff;
+    border-radius: 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pedido-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* Botón principal marrón */
+.btn-brown {
+    background-color: #5a3825;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-brown:hover {
+    background-color: #7b4b31;
+    color: white;
+}
+
+/* Título */
+h2 {
+    color: #5a3825;
+    font-size: 2rem;
+    letter-spacing: 0.5px;
+}
+
+/* Lista dentro de las tarjetas */
+.card-body ul li {
+    margin-bottom: 6px;
+    color: #333;
+}
+
+/* Responsividad */
+@media (max-width: 576px) {
+    .pedido-card {
+        margin-bottom: 20px;
+    }
+}
+</style>
+{% endblock %}

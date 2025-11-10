@@ -70,7 +70,6 @@
             color: rgb(49, 64, 72);
         }
 
-        /* Dropdown del usuario */
         .user-menu {
             position: relative;
             display: inline-block;
@@ -134,11 +133,14 @@
             {% if user.is_authenticated %}
                 <a href="{% url 'productos:lista' %}" class="nav-button">Productos</a>
 
-                {% if user.is_staff %}
+                {% if user.rol == 'admin' %}
                     <a href="{% url 'usuarios:lista' %}" class="nav-button">Usuarios</a>
                 {% endif %}
 
-                <!-- Menú desplegable del usuario -->
+                {% if user.is_staff %}
+                    <a href="{% url 'compras:lista' %}" class="nav-button">Compras</a>
+                {% endif %}
+
                 <div class="user-menu">
                     <button class="user-button">
                         <i class="fa-solid fa-user"></i> {{ user.username }}

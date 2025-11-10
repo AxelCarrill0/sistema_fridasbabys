@@ -1,53 +1,80 @@
 {% extends "home/base.html" %}
 {% block titulo %}Detalle: {{ producto.nombre }}{% endblock %}
-
 {% load humanize %}
 {% load mathfilters %}
 
 {% block contenido %}
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="mb-0 text-center">{{ producto.nombre }}</h2>
-                </div>
-                <div class="card-body p-5">
+        <div class="col-lg-10">
+            <div class="card shadow-lg border-0 rounded-4">
 
-                    <div class="row">
-                        <div class="col-md-5 text-center mb-4">
-                            <i class="fas fa-box fa-10x text-muted border p-4 rounded"></i>
-                            <p class="text-muted mt-2">Imagen no disponible</p>
+                <!-- Header -->
+                <div class="card-header text-center py-3" style="background-color: #5a3825; color: #fff;">
+                    <h2 class="mb-0 fw-bold">{{ producto.nombre }}</h2>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-5" style="background-color: #f6efe7;">
+                    <div class="row align-items-center">
+
+                        <!-- Imagen del producto -->
+                        <div class="col-md-5 text-center mb-4 mb-md-0">
+                            <div class="p-4 bg-white rounded-4 shadow-sm d-flex flex-column align-items-center">
+                                {% if producto.imagen %}
+                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}"
+                                         class="img-fluid rounded mb-3"
+                                         style="max-height: 280px; object-fit: contain; transition: transform 0.3s ease;"
+                                         onmouseover="this.style.transform='scale(1.05)'"
+                                         onmouseout="this.style.transform='scale(1)'">
+
+                                    <form action="{% url 'productos:subir_imagen' producto.id %}" method="post" enctype="multipart/form-data" class="d-flex flex-column align-items-center mt-2">
+                                        {% csrf_token %}
+                                        <input type="file" name="imagen" accept="image/*" class="form-control mb-2" style="max-width: 220px;">
+                                        <button type="submit" class="btn btn-brown btn-sm fw-semibold">Cambiar Imagen</button>
+                                    </form>
+                                {% else %}
+                                    <i class="fas fa-box fa-7x text-secondary mb-3"></i>
+                                    <p class="text-muted mb-3">Imagen no disponible</p>
+
+                                    <form action="{% url 'productos:subir_imagen' producto.id %}" method="post" enctype="multipart/form-data" class="d-flex flex-column align-items-center mt-2">
+                                        {% csrf_token %}
+                                        <input type="file" name="imagen" accept="image/*" class="form-control mb-2" style="max-width: 220px;">
+                                        <button type="submit" class="btn btn-brown btn-sm fw-semibold">Agregar Imagen</button>
+                                    </form>
+                                {% endif %}
+                            </div>
                         </div>
 
+                        <!-- Información del producto -->
                         <div class="col-md-7">
-                            <h4 class="mb-3">Información General</h4>
-                            <p class="lead">{{ producto.descripcion|default:"No hay descripción disponible para este producto." }}</p>
+                            <h4 class="fw-bold text-brown mb-3">Descripción</h4>
+                            <p class="lead" style="color:#333; font-size: 1.15rem;">
+                                {{ producto.descripcion|default:"No hay descripción disponible para este producto." }}
+                            </p>
 
                             <hr>
 
-                            <div class="price-section mb-4">
-                                <h5 class="text-muted mb-2">Precio Base:</h5>
-                                <h3 class="base-price">
-                                    <span class="text-decoration-line-through">${{ producto.precio }}</span>
-                                </h3>
+                            <div class="price-section mb-4" style="font-size: 1.1rem;">
+                                <h6 class="text-muted mb-1 fw-semibold">Precio Base:</h6>
+                                <h4 class="text-decoration-line-through text-secondary mb-2">${{ producto.precio }}</h4>
 
-                                <h5 class="text-success mb-2">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h5>
-                                <h1 class="display-4 text-success fw-bold">
-                                    ${{ precio_promocional }}
-                                </h1>
-                                <span class="badge bg-warning text-dark">¡Ahorras ${{ producto.precio|sub:precio_promocional }}!</span>
+                                <h6 class="text-success mb-1 fw-semibold">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h6>
+                                <h2 class="text-success fw-bold mb-2">${{ precio_promocional }}</h2>
+                                <span class="badge bg-warning text-dark fw-semibold">
+                                    ¡Ahorras ${{ producto.precio|sub:precio_promocional }}!
+                                </span>
                             </div>
 
                             <hr>
 
-                            <div class="details-grid">
+                            <div class="details-grid mb-4">
                                 <div><strong>Stock:</strong>
-                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">{{ producto.stock }} unidades</span>
+                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">
+                                        {{ producto.stock }} unidades
+                                    </span>
                                 </div>
-
                                 <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
-
                                 <div><strong>Estado:</strong>
                                     {% if producto.activo %}
                                         <span class="badge bg-success">Activo</span>
@@ -55,17 +82,21 @@
                                         <span class="badge bg-danger">Inactivo</span>
                                     {% endif %}
                                 </div>
-                                <div><strong>Última Actualización:</strong> {{ producto.fecha_actualizacion|date:"d M, Y H:i" }}</div>
+                                <div><strong>Última Actualización:</strong>
+                                    {{ producto.fecha_actualizacion|date:"d M, Y H:i" }}
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-5 text-center">
-                        <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-warning btn-lg me-2">
-                            <i class="fas fa-edit"></i> Editar Producto
+                    <!-- Botones -->
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-brown btn-lg me-2 fw-semibold">
+                            Editar Producto
                         </a>
-                        <a href="{% url 'productos:lista' %}" class="btn btn-secondary btn-lg">
-                            <i class="fas fa-arrow-left"></i> Volver al Listado
+
+                        <a href="{% url 'productos:lista' %}" class="btn btn-outline-brown btn-lg fw-semibold">
+                            Volver al Listado
                         </a>
                     </div>
                 </div>
@@ -75,19 +106,53 @@
 </div>
 
 <style>
-    .card-header.bg-primary {
-        background-color: #5d677a !important;
-    }
-    .base-price {
-        font-size: 1.5rem;
-        color: #888;
-    }
-    .details-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 15px;
-        text-align: left;
-    }
-</style>
+body {
+    background-color: #d8c3a5;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
 
+/* Tonos principales */
+.text-brown { color: #5a3825; }
+
+.card { border-radius: 14px; }
+.price-section h4, .price-section h6 { line-height: 1.2; }
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 1.1rem;
+    color: #444;
+}
+.details-grid strong { color: #5a3825; }
+
+/* Botones principales (mismo estilo que login y registro) */
+.btn-brown {
+    background-color: #5a3825;
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+.btn-brown:hover {
+    background-color: #7b4b31;
+    color: white;
+}
+
+/* Botón contorno */
+.btn-outline-brown {
+    border: 1px solid #5a3825;
+    color: #5a3825;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+.btn-outline-brown:hover {
+    background-color: #5a3825;
+    color: white;
+}
+
+.btn-lg {
+    border-radius: 8px;
+    padding: 10px 24px;
+}
+</style>
 {% endblock %}

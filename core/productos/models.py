@@ -7,7 +7,7 @@ class Producto(models.Model):
         ('juguetes', 'Juguetes y Didácticos'),
         ('accesorios', 'Accesorios'),
         ('cuidado', 'Cuidado Personal'),
-        ('Zapatos y Zapatillas', 'calzado')
+        ('calzado', 'Zapatos y Zapatillas'),
     )
 
     nombre = models.CharField(max_length=150, unique=True, verbose_name="Nombre del Producto")
@@ -18,9 +18,8 @@ class Producto(models.Model):
     activo = models.BooleanField(default=True, verbose_name="Activo")
     fecha_creacion = models.DateTimeField(auto_now_add=True)
     fecha_actualizacion = models.DateTimeField(auto_now=True)
-
-    # NUEVO: usuario que subió el producto
     creado_por = models.ForeignKey(Usuario, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Creado por")
+    imagen = models.ImageField(upload_to='productos/', null=True, blank=True, verbose_name="Imagen del Producto")
 
     def __str__(self):
         return f"{self.nombre} (Stock: {self.stock})"

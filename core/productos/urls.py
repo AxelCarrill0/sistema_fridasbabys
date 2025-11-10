@@ -11,5 +11,6 @@ urlpatterns = [
 
     path('catalogo/', views.catalogo_productos, name='catalogo'),
     path('detalle/<int:pk>/', views.detalle_producto, name='detalle'),
+    path('subir-imagen/<int:pk>/', views.subir_imagen, name='subir_imagen'),
 
 ]

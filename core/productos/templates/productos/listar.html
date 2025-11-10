@@ -1,72 +1,142 @@
 {% extends "home/base.html" %}
-
 {% block titulo %}Listado de Productos{% endblock %}
 
 {% block contenido %}
-<div class="container mt-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="mb-0">Listado de Productos</h2>
-        <a href="{% url 'productos:crear' %}" class="btn btn-brown">
+<div class="container-fluid py-4" style="max-width: 95%;">
+
+    <!-- Encabezado principal -->
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start w-100">
+        <h1 class="fw-bold text-brown mb-3 mb-md-0">Listado de Productos</h1>
+
+        <!-- Buscador -->
+        <form method="get" class="d-flex align-items-center mb-3 mb-md-0 w-100 w-md-auto justify-content-center justify-content-md-end" style="max-width: 500px;">
+            <div class="input-group w-100">
+                <input type="text" name="q" placeholder="Buscar productos..." value="{{ query }}"
+                       class="form-control form-control-lg rounded-start shadow-sm" style="font-size: 1.1rem;">
+                <button type="submit" class="btn btn-brown rounded-end fw-semibold px-4" style="font-size: 1.1rem;">Buscar</button>
+            </div>
+        </form>
+
+        <!-- Botón crear -->
+        <a href="{% url 'productos:crear' %}" class="btn btn-brown fw-semibold btn-lg ms-md-3">
             <i class="bi bi-plus-circle"></i> Crear Nuevo Producto
         </a>
     </div>
 
-    <!-- Formulario de búsqueda -->
-    <form method="get" class="mb-4 text-center">
-        <div class="input-group w-50 mx-auto">
-            <input type="text" name="q" placeholder="Buscar productos..." value="{{ query }}" class="form-control">
-            <button type="submit" class="btn btn-brown">Buscar</button>
-        </div>
-    </form>
-
     <!-- Listado de productos -->
-    <div class="row">
+    <div class="row justify-content-center">
         {% for producto in productos %}
-        <div class="col-md-4 mb-4">
-            <div class="card shadow-sm h-100 border-0">
-                <div class="card-body text-center">
-                    <h5 class="card-title text-brown fw-bold">{{ producto.nombre }}</h5>
-                    <p class="card-text">{{ producto.descripcion|default:"Sin descripción" }}</p>
-                    <p><strong>Precio:</strong> ${{ producto.precio }}</p>
-                    <p><strong>Stock:</strong> {{ producto.stock }}</p>
-                    <p><strong>Categoría:</strong> {{ producto.get_categoria_display }}</p>
-                    <p><strong>Subido por:</strong> {{ producto.creado_por }}</p>
+        <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+            <div class="card product-card shadow-sm border-0 h-100">
+                <div class="card-body text-center p-4">
 
-                    <!-- Botones de acción -->
-                    <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-success mb-2 w-100">Ver detalle</a>
-                    <a href="{% url 'productos:editar' producto.id %}" class="btn btn-warning mb-2 w-100 text-white">Editar</a>
+                    <h5 class="card-title text-brown fw-bold mb-3" style="font-size: 1.25rem;">{{ producto.nombre }}</h5>
+
+                    <!-- Información del producto -->
+                    <ul class="list-unstyled text-start mb-4" style="font-size: 1rem; color:#333;">
+                        <li><strong>Descripción:</strong> {{ producto.descripcion|default:"Sin descripción" }}</li>
+                        <li><strong>Precio:</strong> ${{ producto.precio }}</li>
+                        <li><strong>Stock:</strong> {{ producto.stock }}</li>
+                        <li><strong>Categoría:</strong> {{ producto.get_categoria_display }}</li>
+                        <li><strong>Subido por:</strong> {{ producto.creado_por|default:"-" }}</li>
+                    </ul>
+
+                    <!-- Botones -->
+                    <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-outline-brown btn-md w-100 mb-2 fw-semibold">Ver detalle</a>
+                    <a href="{% url 'productos:editar' producto.id %}" class="btn btn-brown btn-md w-100 mb-2 fw-semibold">Editar</a>
                     <form action="{% url 'productos:eliminar' producto.id %}" method="post">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger w-100">Eliminar</button>
+                        <button type="submit" class="btn btn-gray btn-md w-100 fw-semibold">Eliminar</button>
                     </form>
                 </div>
             </div>
         </div>
         {% empty %}
         <div class="col-12 text-center">
-            <p>No se encontraron productos.</p>
+            <p class="fs-5 fw-semibold">No se encontraron productos.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Estilos personalizados -->
+<!-- Estilos -->
 <style>
+body {
+    background-color: #d8c3a5; /* Beige cálido */
+    color: #2e2e2e;
+    font-size: 1.1rem;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Colores principales */
 .text-brown {
     color: #5a3825;
 }
+
+/* Botones marrones principales */
 .btn-brown {
-    background-color: #8B5E3C;
+    background-color: #5a3825;
     color: white;
     border: none;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
 }
 .btn-brown:hover {
-    background-color: #70432A;
-    color: #fff;
+    background-color: #7b4b31;
+    color: white;
 }
-.card {
-    border-radius: 10px;
+
+/* Botón contorno marrón */
+.btn-outline-brown {
+    border: 1px solid #5a3825;
+    color: #5a3825;
+    background-color: transparent;
+    transition: all 0.3s ease;
+}
+.btn-outline-brown:hover {
+    background-color: #5a3825;
+    color: white;
+}
+
+/* Botón eliminar gris */
+.btn-gray {
+    background-color: #6b7b83;
+    border: none;
+    color: white;
+    transition: all 0.3s ease;
+}
+.btn-gray:hover {
+    background-color: #4b585e;
+}
+
+/* Tarjetas */
+.product-card {
+    border-radius: 14px;
+    background-color: #ffffff;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
+}
+
+/* Input del buscador */
+.input-group .form-control {
+    height: 48px;
+    font-size: 1.1rem;
+    border: 1px solid #bfa88a;
+}
+.input-group .btn {
+    height: 48px;
+}
+
+/* Título */
+h1 {
+    font-size: 2rem;
+    color: #5a3825;
+}
+
+.card-body ul li {
+    margin-bottom: 6px;
 }
 </style>
 {% endblock contenido %}
