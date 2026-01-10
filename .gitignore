@@ -3,7 +3,7 @@
 venv/
 env/
 
-# Base de datos local
+# Base de datos local (Cada uno tendrá la suya en su PC)
 db.sqlite3
 db.sqlite3-journal
 
@@ -14,6 +14,9 @@ __pycache__/
 # Archivos del IDE (PyCharm)
 .idea/
 
-# Archivos de configuración local (si los usas)
+# Configuración local
 .env
 *.local
+
+# Carpeta de medios (Fotos de verificación que se suban en local)
+media/
