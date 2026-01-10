@@ -1,3 +1,5 @@
+"""URLs del módulo de usuarios."""
+
 from django.urls import path
 from . import views
 
@@ -11,5 +13,6 @@ urlpatterns = [
     path('registrar/', views.register_client, name='registrar_cliente'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+    path('perfil/', views.ver_perfil, name='perfil'),
+    path('verificar-pass-ajax/', views.verificar_password_ajax, name='verificar_pass'),
 ]
-

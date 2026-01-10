@@ -1,11 +1,8 @@
 from core.usuarios.models import Usuario
 from core.usuarios.factory.usuario_factory import UsuarioFactory
-class UsuarioFacade:
 
-    """
-    Patrón Facade.
-    Centraliza las operaciones CRUD de usuarios.
-    """
+
+class UsuarioFacade:
 
     def crear_usuario(self, **datos):
         return UsuarioFactory.crear_usuario(**datos)

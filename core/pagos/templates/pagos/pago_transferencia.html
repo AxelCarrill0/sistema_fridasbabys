@@ -1,0 +1,55 @@
+{% extends "home/base_cliente.html" %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5 text-center">
+
+                    <h3 class="fw-bold mb-2">
+                        Transferencia Bancaria
+                    </h3>
+                    <p class="text-muted mb-4">
+                        Escanea el código QR para realizar el pago
+                    </p>
+
+                    <div class="mb-4">
+                        <span class="badge bg-light text-dark fs-6 px-4 py-2">
+                            Total a pagar:
+                            <strong class="ms-1">
+                                ${{ pago.total|floatformat:2 }}
+                            </strong>
+                        </span>
+                    </div>
+
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="border rounded-4 p-3 shadow-sm bg-white">
+                            <img
+                                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TRANSFERENCIA_FICTICIA"
+                                alt="QR de transferencia"
+                                style="max-width: 220px; width: 100%; height: auto;"
+                            >
+                        </div>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Una vez realizada la transferencia, confirma el pago para continuar
+                    </p>
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="btn btn-success w-100 py-3 rounded-3 shadow-sm">
+                             Ya realicé el pago
+                        </button>
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

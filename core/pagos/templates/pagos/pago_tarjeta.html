@@ -1,0 +1,157 @@
+{% extends "home/base_cliente.html" %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <h3 class="text-center fw-bold mb-2">Pago con Tarjeta</h3>
+                    <p class="text-center text-muted mb-4">Verificación de identidad requerida</p>
+
+                    <div class="text-center mb-4">
+                        <span class="badge bg-light text-dark fs-6 px-4 py-2">
+                            Total: <strong>${{ pago.total|floatformat:2 }}</strong>
+                        </span>
+                    </div>
+
+                    <form method="post" id="form-pago-tarjeta" action="{% url 'pagos:procesar_pago' pago.id %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="rostro_verificacion" id="rostro_data">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nombre del titular</label>
+                            <input type="text" name="titular" class="form-control form-control-lg" placeholder="Nombre en tarjeta" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Número de tarjeta</label>
+                            <input type="text" name="numero" class="form-control form-control-lg" placeholder="**** **** **** ****" required>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">Vencimiento</label>
+                                <input type="text" name="vencimiento" class="form-control form-control-lg" placeholder="MM/AA" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-semibold">CVV</label>
+                                <input type="password" name="cvv" class="form-control form-control-lg" placeholder="***" required>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary w-100 py-3 mt-3 rounded-3 fw-bold shadow-sm" onclick="iniciarVerificacion()">
+                            <i class="fas fa-user-shield me-2"></i> Verificar Identidad y Pagar
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="modal-facial" class="modal-facial-overlay" style="display:none;">
+    <div class="modal-facial-content shadow-lg">
+        <h4 class="fw-bold text-dark">Escaneo Facial</h4>
+        <p class="small text-muted">Por favor, mantén tu rostro dentro del círculo</p>
+
+        <div class="video-container shadow-sm">
+            <video id="video" autoplay muted playsinline></video>
+            <div class="face-guide"></div>
+            <canvas id="canvas" style="display:none;"></canvas>
+        </div>
+
+        <div id="scan-status" class="mt-3 fw-bold text-primary">Esperando cámara...</div>
+
+        <div class="d-flex gap-2 mt-4">
+            <button class="btn btn-success flex-grow-1 py-2 fw-bold" id="btn-capturar">
+                <i class="fas fa-camera me-2"></i> Capturar Rostro
+            </button>
+            <button class="btn btn-light py-2" onclick="cerrarModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+    .modal-facial-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+    .modal-facial-content {
+        background: white; padding: 2.5rem; border-radius: 30px; text-align: center; max-width: 450px; width: 95%;
+    }
+    .video-container {
+        position: relative; width: 280px; height: 280px; margin: 0 auto;
+        border-radius: 50%; overflow: hidden; border: 5px solid #0d6efd;
+    }
+    #video { width: 100%; height: 100%; object-fit: cover; }
+    .face-guide {
+        position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        width: 85%; height: 85%; border: 2px dashed rgba(255,255,255,0.6); border-radius: 50%;
+    }
+</style>
+
+<script>
+let stream;
+const modal = document.getElementById('modal-facial');
+const video = document.getElementById('video');
+const form = document.getElementById('form-pago-tarjeta');
+
+async function iniciarVerificacion() {
+    // Validar campos básicos antes de abrir cámara
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 400 } });
+        video.srcObject = stream;
+        modal.style.display = 'flex';
+        document.getElementById('scan-status').innerText = "Apunta a tu rostro";
+    } catch (err) {
+        alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+        console.error(err);
+    }
+}
+
+document.getElementById('btn-capturar').addEventListener('click', function() {
+    const canvas = document.getElementById('canvas');
+    const context = canvas.getContext('2d');
+    canvas.width = 400;
+    canvas.height = 400;
+
+    // Capturar frame
+    context.drawImage(video, 0, 0, 400, 400);
+
+    // Convertir a base64
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+    document.getElementById('rostro_data').value = dataUrl;
+
+    document.getElementById('scan-status').innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Procesando identidad...';
+    this.disabled = true;
+
+    // Detener cámara y enviar automáticamente
+    setTimeout(() => {
+        if(stream) stream.getTracks().forEach(track => track.stop());
+        form.submit();
+    }, 800);
+});
+
+function cerrarModal() {
+    if(stream) stream.getTracks().forEach(track => track.stop());
+    modal.style.display = 'none';
+}
+</script>
+{% endblock %}

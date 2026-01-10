@@ -1,0 +1,76 @@
+{% extends "home/base_cliente.html" %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+
+                    <h2 class="text-center fw-bold mb-2">
+                        Selecciona el método de pago
+                    </h2>
+                    <p class="text-center text-muted mb-4">
+                        Elige cómo deseas completar tu compra
+                    </p>
+
+                    <div class="text-center mb-4">
+                        <span class="badge bg-light text-dark fs-6 px-4 py-2">
+                            Total a pagar:
+                            <strong class="ms-1">
+                                ${{ pago.total|floatformat:2 }}
+                            </strong>
+                        </span>
+                    </div>
+
+                    <div class="row g-4">
+
+                        <div class="col-md-6">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="metodo" value="tarjeta">
+
+                                <button type="submit"
+                                        class="btn btn-primary w-100 p-4 rounded-3 shadow-sm">
+                                    <div class="fs-1 mb-2">💳</div>
+                                    <div class="fw-bold fs-5">Tarjeta</div>
+                                    <small class="opacity-75">
+                                        Pago inmediato y seguro
+                                    </small>
+                                </button>
+                            </form>
+                        </div>
+
+                        <div class="col-md-6">
+                            <form method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="metodo" value="transferencia">
+
+                                <button type="submit"
+                                        class="btn btn-success w-100 p-4 rounded-3 shadow-sm">
+                                    <div class="fs-1 mb-2">🏦</div>
+                                    <div class="fw-bold fs-5">Transferencia</div>
+                                    <small class="opacity-75">
+                                        Escaneo de código QR
+                                    </small>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <a href="{% url 'pedidos:lista_pedidos' %}"
+                           class="btn btn-outline-secondary px-4">
+                            Cancelar
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,3 +1,8 @@
+"""
+URLs de la aplicación Productos.
+Define las rutas para gestión, creación, edición, eliminación, catálogo y detalle de productos.
+"""
+
 from django.urls import path
 from . import views
 
@@ -8,9 +13,7 @@ urlpatterns = [
     path('crear/', views.crear_producto, name='crear'),
     path('editar/<int:pk>/', views.editar_producto, name='editar'),
     path('eliminar/<int:pk>/', views.eliminar_producto, name='eliminar'),
-
     path('catalogo/', views.catalogo_productos, name='catalogo'),
     path('detalle/<int:pk>/', views.detalle_producto, name='detalle'),
     path('subir-imagen/<int:pk>/', views.subir_imagen, name='subir_imagen'),
-
 ]

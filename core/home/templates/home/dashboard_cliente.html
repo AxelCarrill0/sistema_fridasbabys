@@ -1,0 +1,47 @@
+{% extends "home/base_cliente.html" %}
+{% block titulo %}Inicio{% endblock %}
+
+{% block contenido %}
+<div class="container text-center mt-5">
+    <h2 class="mb-4">¡Bienvenido, {{ user.username }}!</h2>
+    <p class="lead mb-5">Explora nuestros productos y consulta tus pedidos fácilmente.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100 card-hover">
+                <div class="card-body">
+                    <i class="fas fa-store fa-4x text-primary mb-3"></i>
+                    <h4 class="card-title text-primary fw-bold">Catálogo de Productos</h4>
+                    <p class="card-text">Explora nuestra selección de artículos disponibles para ti.</p>
+                    <a href="{% url 'productos:catalogo' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-arrow-right"></i> Ver Catálogo
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100 card-hover">
+                <div class="card-body">
+                    <i class="fas fa-box fa-4x text-success mb-3"></i>
+                    <h4 class="card-title text-success fw-bold">Mis Pedidos</h4>
+                    <p class="card-text">Consulta el estado y los detalles de tus pedidos realizados.</p>
+                    <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-success mt-3">
+                        <i class="fas fa-arrow-right"></i> Ver Mis Pedidos
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card-hover {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.card-hover:hover {
+    transform: translateY(-6px);
+    box-shadow: 0px 6px 16px rgba(0,0,0,0.2);
+}
+</style>
+{% endblock contenido %}

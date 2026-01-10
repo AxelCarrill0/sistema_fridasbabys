@@ -1,0 +1,108 @@
+{% extends "home/base_cliente.html" %}
+{% load mathfilters %}
+
+{% block contenido %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold mb-1">Frida’s Babys</h2>
+                        <h5 class="text-muted mb-0">Recibo de Pago</h5>
+                    </div>
+
+                    <hr>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>N.º de Pago:</strong> {{ pago.id }}</p>
+                           <p class="mb-1">
+                                <strong>Fecha:</strong>
+                                {{ pago.fecha_pago|date:"d/m/Y" }}
+                           </p>
+                        </div>
+
+                        <div class="col-md-6 text-md-end">
+                            <p class="mb-1">
+                                <strong>Método:</strong>
+                                {{ pago.metodo_pago|capfirst }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Estado:</strong>
+                                <span class="badge bg-success">Pagado</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="border rounded-3 p-3 mb-4">
+                        <h6 class="fw-bold mb-3">Datos del Cliente</h6>
+                        <p class="mb-1"><strong>Nombre:</strong> {{ pago.usuario.nombre }}</p>
+                        <p class="mb-1"><strong>Correo:</strong> {{ pago.usuario.email }}</p>
+                        <p class="mb-1"><strong>Teléfono:</strong> {{ pago.usuario.telefono }}</p>
+                        <p class="mb-0"><strong>Dirección:</strong> {{ pago.usuario.direccion }}</p>
+                    </div>
+
+                    <h6 class="fw-bold mb-3">Detalle de Productos</h6>
+
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-light">
+                                <tr class="text-center">
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in pedidos %}
+                                <tr class="text-center">
+                                    <td class="text-start">
+                                        {{ pedido.producto.nombre }}
+                                    </td>
+                                    <td>{{ pedido.cantidad }}</td>
+                                    <td>
+                                        ${{ pedido.producto.precio_final|floatformat:2 }}
+                                    </td>
+                                    <td>
+                                        ${{ pedido.cantidad|mul:pedido.producto.precio_final|floatformat:2 }}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="d-flex justify-content-end mb-4">
+                        <div class="border rounded-3 p-3 bg-light">
+                            <h5 class="mb-0">
+                                Total pagado:
+                                <strong>
+                                    ${{ pago.total|floatformat:2 }}
+                                </strong>
+                            </h5>
+                        </div>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="{% url 'pagos:descargar_comprobante' pago.id %}"
+                           class="btn btn-outline-primary px-4">
+                             Descargar comprobante
+                        </a>
+
+                        <a href="{% url 'pedidos:lista_pedidos' %}"
+                           class="btn btn-secondary ms-2 px-4">
+                            Regresar
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

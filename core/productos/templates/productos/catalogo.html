@@ -3,99 +3,200 @@
 {% block titulo %}Catálogo de Productos{% endblock %}
 
 {% block contenido %}
-<div class="container mt-5">
-  <h2 class="text-center mb-4 text-brown">Catálogo de Productos</h2>
+<div class="container py-5">
+  <h2 class="text-center mb-5 text-brown fw-bold display-5">Nuestro Catálogo</h2>
 
-  <!-- Formulario de búsqueda -->
-  <form method="get" class="mb-4 text-center">
-    <div class="input-group w-50 mx-auto">
-      <input type="text" name="q" placeholder="Buscar productos..." value="{{ q }}" class="form-control shadow-sm">
-      <button type="submit" class="btn btn-success px-4 fw-bold">
-        <i class="fas fa-search"></i> Buscar
-      </button>
-    </div>
-  </form>
-
-  <!-- Lista de productos -->
-  <div class="row">
-    {% for producto in productos %}
-      <div class="col-md-4 mb-4">
-        <div class="card product-card shadow-sm h-100 border-0">
-          {% if producto.imagen %}
-            <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 220px; object-fit: cover;">
-          {% else %}
-            <div class="d-flex align-items-center justify-content-center" style="height: 220px; background-color: #f5f5f5;">
-              <i class="bi bi-box-seam fs-1 text-muted"></i>
+  <div class="row justify-content-center mb-5">
+    <div class="col-12">
+      <form method="get" id="search-form" class="card p-3 shadow-sm border-0 bg-light rounded-4">
+        <div class="row g-3 align-items-center">
+          <div class="col-lg-5 col-md-12">
+            <div class="input-group">
+              <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+              <input type="text" name="q" id="search-input" placeholder="¿Qué estás buscando?" value="{{ q }}" class="form-control border-start-0 border-end-0 shadow-none">
+              <button class="btn btn-white border border-start-0 text-muted" type="button" id="voice-search-btn" title="Buscar por voz">
+                <i class="fas fa-microphone" id="mic-icon"></i>
+              </button>
             </div>
-          {% endif %}
-          <div class="card-body text-center">
-            <h5 class="card-title text-brown fw-bold">{{ producto.nombre }}</h5>
-            <p class="card-text text-muted">{{ producto.descripcion|truncatechars:90|default:"Sin descripción" }}</p>
-            <p class="price"><strong>Precio:</strong> ${{ producto.precio }}</p>
+          </div>
 
-            <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-success w-100 fw-bold">
-              <i class="fas fa-info-circle"></i> Ver Detalle
+          <div class="col-lg-4 col-md-8">
+            <select name="categoria" class="form-select shadow-none">
+              <option value="">Todas las categorías</option>
+              {% for valor, nombre in categorias %}
+                <option value="{{ valor }}" {% if categoria_actual == valor %}selected{% endif %}>{{ nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-lg-3 col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-success flex-grow-1 fw-bold shadow-sm">Filtrar</button>
+            {% if q or categoria_actual %}
+              <a href="{% url 'productos:catalogo' %}" class="btn btn-outline-secondary shadow-sm" title="Limpiar filtros">
+                <i class="fas fa-undo-alt"></i>
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="row g-4">
+    {% for producto in productos %}
+      <div class="col-xl-3 col-lg-4 col-md-6">
+        <div class="card product-card shadow-sm h-100 border-0">
+
+          <div class="product-img-container">
+            {% if producto.imagen %}
+              <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+            {% else %}
+              <div class="d-flex align-items-center justify-content-center bg-light h-100">
+                <i class="fas fa-image fa-3x text-secondary opacity-25"></i>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="card-body d-flex flex-column p-4">
+            <h5 class="card-title text-brown fw-bold mb-2 text-truncate" title="{{ producto.nombre }}">
+              {{ producto.nombre }}
+            </h5>
+
+            <p class="card-text text-muted small mb-3 description-text">
+              {{ producto.descripcion|truncatechars:70|default:"Calidad garantizada en cada detalle de este producto." }}
+            </p>
+
+            <div class="mb-3">
+              <span class="text-info-custom small fw-bold bg-light-blue px-2 py-1 rounded">
+                <i class="fas fa-tag me-1 small"></i> {{ producto.get_categoria_display }}
+              </span>
+            </div>
+
+            <div class="mt-auto pt-3 border-top">
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small">Precio:</span>
+                    <span class="price fw-bold text-success">${{ producto.precio_final|floatformat:2 }}</span>
+                </div>
+            </div>
+
+            <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-success w-100 fw-bold py-2 mt-3 rounded-3 shadow-sm">
+              Ver Detalles <i class="fas fa-chevron-right ms-1 small"></i>
             </a>
           </div>
         </div>
       </div>
     {% empty %}
-      <div class="col-12 text-center">
-        <p class="text-muted">No se encontraron productos.</p>
+      <div class="col-12 text-center py-5">
+        <div class="bg-light d-inline-block p-4 rounded-circle mb-3">
+          <i class="fas fa-search fa-3x text-muted"></i>
+        </div>
+        <h4 class="text-muted fw-bold">No se encontraron resultados</h4>
+        <p class="text-muted">Intenta buscar con otros términos.</p>
+        <a href="{% url 'productos:catalogo' %}" class="btn btn-success mt-2 px-4">Ver todo el catálogo</a>
       </div>
     {% endfor %}
   </div>
 </div>
+
+<script>
+    // Búsqueda por Voz
+    const voiceBtn = document.getElementById('voice-search-btn');
+    const searchInput = document.getElementById('search-input');
+    const micIcon = document.getElementById('mic-icon');
+    const searchForm = document.getElementById('search-form');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+
+        voiceBtn.addEventListener('click', () => recognition.start());
+
+        recognition.onstart = () => {
+            micIcon.classList.add('mic-active');
+            searchInput.placeholder = "Escuchando...";
+        };
+
+        recognition.onresult = (event) => {
+            searchInput.value = event.results[0][0].transcript;
+            searchForm.submit();
+        };
+
+        recognition.onend = () => {
+            micIcon.classList.remove('mic-active');
+            searchInput.placeholder = "¿Qué estás buscando?";
+        };
+    } else {
+        voiceBtn.style.display = 'none';
+    }
+</script>
 {% endblock contenido %}
 
 {% block extra_css %}
 <style>
-  .text-brown { color: #5a3825; }
+  body { background-color: #f4f7f6; }
+  .text-brown { color: #1d3557; }
 
-  /* Botón buscar verde estilo profesional */
+  /* Contenedor de Imagen fijo para uniformidad */
+  .product-img-container {
+    height: 220px;
+    overflow: hidden;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+  }
+
+  .card-img-top {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+  }
+
+  .product-card {
+    border-radius: 20px;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: #ffffff;
+    border: 1px solid rgba(0,0,0,0.03) !important;
+  }
+
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 25px rgba(29, 53, 87, 0.1) !important;
+  }
+
+  .product-card:hover .card-img-top {
+    transform: scale(1.08);
+  }
+
+
+  .description-text {
+    min-height: 40px;
+    line-height: 1.4;
+  }
+
+  .price { font-size: 1.4rem; letter-spacing: -0.5px; }
+
   .btn-success {
     background-color: #28a745 !important;
     border: none;
-    color: #fff;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-  }
-  .btn-success:hover {
-    background-color: #218838 !important;
-    transform: scale(1.03);
+    transition: background 0.2s;
   }
 
-  /* Tarjetas de productos */
-  .product-card {
-    overflow: hidden;
-    transition: transform 0.25s, box-shadow 0.25s;
-    background-color: #ffffff;
-  }
-  .product-card:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  .btn-success:hover { background-color: #218838 !important; }
+
+  /* Badge de categoría sutil */
+  .text-info-custom { color: #457b9d; }
+  .bg-light-blue { background-color: #f0f8ff; }
+
+  .mic-active {
+    color: #e63946 !important;
+    animation: pulse-red 1.2s infinite;
   }
 
-  /* Precio */
-  .price {
-    color: #4a4e69;
-    font-size: 1.1rem;
-    margin-bottom: 10px;
-  }
-
-  /* Botón "Ver detalle" coherente con el botón de comprar */
-  .btn-success.w-100 {
-    font-weight: 500;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    border-radius: 8px;
-  }
-
-  /* Input de búsqueda */
-  .form-control {
-    border-radius: 8px 0 0 8px;
-  }
-
-  .input-group .btn {
-    border-radius: 0 8px 8px 0;
+  @keyframes pulse-red {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.7; }
+    100% { transform: scale(1); opacity: 1; }
   }
 </style>
 {% endblock extra_css %}

@@ -1,9 +1,7 @@
 import decimal
 from ..models import Producto
 
-
 class ProductoComponente:
-    """Define la interfaz para los objetos que pueden tener funcionalidad añadida."""
 
     def get_precio_base(self):
         raise NotImplementedError
@@ -18,10 +16,10 @@ class ProductoComponent(ProductoComponente):
         self._producto = producto
 
     def get_precio_base(self):
-        return self._producto.precio
+        return self._producto.precio_base
 
     def get_precio_final(self):
-        return self._producto.precio
+        return self._producto.precio_final
 
 
 class ProductoDecorator(ProductoComponente):
@@ -32,6 +30,9 @@ class ProductoDecorator(ProductoComponente):
     def get_precio_base(self):
         return self._componente.get_precio_base()
 
+    def get_precio_final(self):
+        return self._componente.get_precio_final()
+
 
 class DescuentoPorcentajeDecorator(ProductoDecorator):
 
@@ -40,9 +41,9 @@ class DescuentoPorcentajeDecorator(ProductoDecorator):
         self._porcentaje_descuento = porcentaje_descuento
 
     def get_precio_final(self):
-        precio_base = self.get_precio_base()
+        precio_final_original = self._componente.get_precio_final()
 
         factor_descuento = (decimal.Decimal('100') - self._porcentaje_descuento) / decimal.Decimal('100')
-        precio_con_descuento = precio_base * factor_descuento
+        precio_con_descuento = precio_final_original * factor_descuento
 
         return precio_con_descuento.quantize(decimal.Decimal('0.01'))

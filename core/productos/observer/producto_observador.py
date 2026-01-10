@@ -5,8 +5,6 @@ class ProductoObserver:
 
         raise NotImplementedError
 
-
-# SUJETO OBSERVABLE
 class ProductoSubject:
 
     _observadores = []

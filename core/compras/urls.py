@@ -1,3 +1,7 @@
+"""
+Rutas (URLs) de la aplicación Compras.
+"""
+
 from django.urls import path
 from . import views
 

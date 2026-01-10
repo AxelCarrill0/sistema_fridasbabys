@@ -15,7 +15,9 @@ urlpatterns = [
     path('usuarios/', include('core.usuarios.urls', namespace='usuarios')),
 
     path('pedidos/', include('core.pedidos.urls', namespace='pedidos')),
-    path('compras/', include('core.compras.urls', namespace='compras')),  # <-- Agregar aquí
+    path('compras/', include('core.compras.urls', namespace='compras')),
+
+    path('pagos/', include('core.pagos.urls')),
 
 ]
 if settings.DEBUG:

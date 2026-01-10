@@ -4,139 +4,185 @@
 {% block contenido %}
 <div class="container-fluid py-4" style="max-width: 95%;">
 
-    <!-- Encabezado principal -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4 text-center text-md-start w-100">
-        <h1 class="fw-bold text-brown mb-3 mb-md-0">Listado de Productos</h1>
+    {% if messages %}
+        <div class="mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-info-circle me-2"></i> {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
 
-        <!-- Buscador -->
-        <form method="get" class="d-flex align-items-center mb-3 mb-md-0 w-100 w-md-auto justify-content-center justify-content-md-end" style="max-width: 500px;">
-            <div class="input-group w-100">
-                <input type="text" name="q" placeholder="Buscar productos..." value="{{ query }}"
-                       class="form-control form-control-lg rounded-start shadow-sm" style="font-size: 1.1rem;">
-                <button type="submit" class="btn btn-brown rounded-end fw-semibold px-4" style="font-size: 1.1rem;">Buscar</button>
-            </div>
-        </form>
-
-        <!-- Botón crear -->
-        <a href="{% url 'productos:crear' %}" class="btn btn-brown fw-semibold btn-lg ms-md-3">
-            <i class="bi bi-plus-circle"></i> Crear Nuevo Producto
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-4">
+        <h1 class="fw-bold text-brown mb-3 mb-md-0"><i class="fas fa-boxes"></i> Panel de Productos</h1>
+        <a href="{% url 'productos:crear' %}" class="btn btn-success fw-bold btn-lg shadow-sm">
+            <i class="fas fa-plus-circle"></i> Nuevo Producto
         </a>
     </div>
 
-    <!-- Listado de productos -->
-    <div class="row justify-content-center">
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body">
+            <form method="get" id="search-form" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" name="q" id="search-input" placeholder="Buscar por nombre o descripción..." value="{{ query }}"
+                               class="form-control border-start-0 border-end-0 shadow-none">
+                        <button class="btn btn-white border border-start-0 text-muted" type="button" id="voice-search-btn" title="Buscar por voz">
+                            <i class="fas fa-microphone" id="mic-icon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <select name="categoria" class="form-select shadow-none">
+                        <option value="">Todas las categorías</option>
+                        {% for valor, nombre in categorias %}
+                            <option value="{{ valor }}" {% if categoria_actual == valor %}selected{% endif %}>{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-brown w-100 fw-bold">Filtrar</button>
+                    {% if query or categoria_actual %}
+                        <a href="{% url 'productos:lista' %}" class="btn btn-outline-secondary" title="Limpiar">
+                            <i class="fas fa-undo"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
         {% for producto in productos %}
         <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
             <div class="card product-card shadow-sm border-0 h-100">
+                <div class="position-absolute top-0 end-0 m-2">
+                    {% if producto.activo %}
+                        <span class="badge bg-success">Activo</span>
+                    {% else %}
+                        <span class="badge bg-danger">Inactivo</span>
+                    {% endif %}
+                </div>
+
                 <div class="card-body text-center p-4">
+                    <h5 class="card-title text-brown fw-bold mb-3">{{ producto.nombre }}</h5>
 
-                    <h5 class="card-title text-brown fw-bold mb-3" style="font-size: 1.25rem;">{{ producto.nombre }}</h5>
+                    <div class="text-start mb-4 small border-bottom pb-3">
+                        <p class="mb-1"><strong><i class="fas fa-tag"></i> Categoría:</strong> {{ producto.get_categoria_display }}</p>
+                        <p class="mb-1"><strong><i class="fas fa-dollar-sign"></i> Precio Venta:</strong> ${{ producto.precio_final }}</p>
+                        <p class="mb-1"><strong><i class="fas fa-cubes"></i> Stock:</strong> {{ producto.stock }}</p>
+                        <p class="mb-0 text-muted text-truncate"><strong><i class="fas fa-user"></i> Autor:</strong> {{ producto.creado_por|default:"Admin" }}</p>
+                    </div>
 
-                    <!-- Información del producto -->
-                    <ul class="list-unstyled text-start mb-4" style="font-size: 1rem; color:#333;">
-                        <li><strong>Descripción:</strong> {{ producto.descripcion|default:"Sin descripción" }}</li>
-                        <li><strong>Precio:</strong> ${{ producto.precio }}</li>
-                        <li><strong>Stock:</strong> {{ producto.stock }}</li>
-                        <li><strong>Categoría:</strong> {{ producto.get_categoria_display }}</li>
-                        <li><strong>Subido por:</strong> {{ producto.creado_por|default:"-" }}</li>
-                    </ul>
-
-                    <!-- Botones -->
-                    <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-outline-brown btn-md w-100 mb-2 fw-semibold">Ver detalle</a>
-                    <a href="{% url 'productos:editar' producto.id %}" class="btn btn-brown btn-md w-100 mb-2 fw-semibold">Editar</a>
-                    <form action="{% url 'productos:eliminar' producto.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-gray btn-md w-100 fw-semibold">Eliminar</button>
-                    </form>
+                    <div class="row g-2">
+                        <div class="col-12">
+                            <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-outline-brown btn-sm w-100 fw-bold py-2">
+                                <i class="fas fa-eye me-1"></i> Ver detalle
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <a href="{% url 'productos:editar' producto.id %}" class="btn btn-warning btn-sm w-100 fw-bold py-2">
+                                <i class="fas fa-edit me-1"></i> Editar
+                            </a>
+                        </div>
+                        <div class="col-6">
+                            <form action="{% url 'productos:eliminar' producto.id %}" method="post" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold py-2">
+                                    <i class="fas fa-trash-alt me-1"></i> Eliminar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <div class="col-12 text-center">
-            <p class="fs-5 fw-semibold">No se encontraron productos.</p>
+        <div class="col-12 text-center py-5">
+            <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+            <p class="fs-5 fw-semibold text-muted">No se encontraron productos con los criterios seleccionados.</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
-<!-- Estilos -->
 <style>
-body {
-    background-color: #d8c3a5; /* Beige cálido */
-    color: #2e2e2e;
-    font-size: 1.1rem;
-    font-family: 'Segoe UI', Roboto, sans-serif;
-}
+body { background-color: #a8dadc; font-family: 'Segoe UI', sans-serif; }
+.text-brown { color: #1d3557; }
+.btn-brown { background-color: #1d3557; color: white; border: none; }
+.btn-brown:hover { background-color: #395278; color: white; }
+.btn-outline-brown { border: 1px solid #1d3557; color: #1d3557; background-color: transparent; }
+.btn-outline-brown:hover { background-color: #1d3557; color: white; }
+.btn-warning { background-color: #ffb703 !important; border: none; color: #000 !important; }
+.btn-warning:hover { background-color: #fb8500 !important; }
+.btn-danger { background-color: #e63946 !important; border: none; color: white !important; }
+.btn-danger:hover { background-color: #c1121f !important; }
+.btn-success { background-color: #28a745 !important; border: none; }
+.product-card { border-radius: 15px; background-color: #ffffff; transition: all 0.3s ease; }
+.product-card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.15) !important; }
+.form-control, .form-select { border-radius: 8px; height: 40px; }
 
-/* Colores principales */
-.text-brown {
-    color: #5a3825;
-}
-
-/* Botones marrones principales */
-.btn-brown {
-    background-color: #5a3825;
-    color: white;
-    border: none;
-    transition: all 0.3s ease;
-}
-.btn-brown:hover {
-    background-color: #7b4b31;
-    color: white;
-}
-
-/* Botón contorno marrón */
-.btn-outline-brown {
-    border: 1px solid #5a3825;
-    color: #5a3825;
-    background-color: transparent;
-    transition: all 0.3s ease;
-}
-.btn-outline-brown:hover {
-    background-color: #5a3825;
-    color: white;
-}
-
-/* Botón eliminar gris */
-.btn-gray {
-    background-color: #6b7b83;
-    border: none;
-    color: white;
-    transition: all 0.3s ease;
-}
-.btn-gray:hover {
-    background-color: #4b585e;
-}
-
-/* Tarjetas */
-.product-card {
-    border-radius: 14px;
-    background-color: #ffffff;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25);
-}
-
-/* Input del buscador */
-.input-group .form-control {
-    height: 48px;
-    font-size: 1.1rem;
-    border: 1px solid #bfa88a;
-}
-.input-group .btn {
-    height: 48px;
-}
-
-/* Título */
-h1 {
-    font-size: 2rem;
-    color: #5a3825;
-}
-
-.card-body ul li {
-    margin-bottom: 6px;
+/* Animación para el micrófono cuando está activo */
+.mic-active { color: #e63946 !important; animation: pulse 1.5s infinite; }
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 </style>
+
+<script>
+    const voiceBtn = document.getElementById('voice-search-btn');
+    const searchInput = document.getElementById('search-input');
+    const micIcon = document.getElementById('mic-icon');
+    const searchForm = document.getElementById('search-form');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+
+        recognition.lang = 'es-ES'; // Configura a español
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        voiceBtn.addEventListener('click', () => {
+            recognition.start();
+        });
+
+        recognition.onstart = () => {
+            micIcon.classList.add('mic-active');
+            searchInput.placeholder = "Escuchando...";
+        };
+
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            searchInput.value = transcript;
+            micIcon.classList.remove('mic-active');
+            // Envía el formulario automáticamente al terminar de hablar
+            searchForm.submit();
+        };
+
+        recognition.onerror = () => {
+            micIcon.classList.remove('mic-active');
+            searchInput.placeholder = "Error al escuchar...";
+        };
+
+        recognition.onend = () => {
+            micIcon.classList.remove('mic-active');
+            if(searchInput.value === "") {
+                searchInput.placeholder = "Buscar por nombre o descripción...";
+            }
+        };
+
+    } else {
+        // Si el navegador no soporta la API, ocultamos el botón
+        voiceBtn.style.display = 'none';
+        console.warn("Tu navegador no soporta búsqueda por voz.");
+    }
+</script>
 {% endblock contenido %}

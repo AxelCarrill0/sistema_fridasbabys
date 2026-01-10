@@ -9,16 +9,13 @@
         <div class="col-lg-10">
             <div class="card shadow-lg border-0 rounded-4">
 
-                <!-- Header -->
-                <div class="card-header text-center py-3" style="background-color: #5a3825; color: #fff;">
+                <div class="card-header text-center py-3" style="background-color: #1d3557; color: #fff;">
                     <h2 class="mb-0 fw-bold">{{ producto.nombre }}</h2>
                 </div>
 
-                <!-- Body -->
                 <div class="card-body p-5" style="background-color: #f6efe7;">
                     <div class="row align-items-center">
 
-                        <!-- Imagen del producto -->
                         <div class="col-md-5 text-center mb-4 mb-md-0">
                             <div class="p-4 bg-white rounded-4 shadow-sm d-flex flex-column align-items-center">
                                 {% if producto.imagen %}
@@ -46,7 +43,6 @@
                             </div>
                         </div>
 
-                        <!-- Información del producto -->
                         <div class="col-md-7">
                             <h4 class="fw-bold text-brown mb-3">Descripción</h4>
                             <p class="lead" style="color:#333; font-size: 1.15rem;">
@@ -55,16 +51,37 @@
 
                             <hr>
 
-                            <div class="price-section mb-4" style="font-size: 1.1rem;">
-                                <h6 class="text-muted mb-1 fw-semibold">Precio Base:</h6>
-                                <h4 class="text-decoration-line-through text-secondary mb-2">${{ producto.precio }}</h4>
+                           <div class="price-section mb-4" style="font-size: 1.1rem;">
 
-                                <h6 class="text-success mb-1 fw-semibold">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h6>
-                                <h2 class="text-success fw-bold mb-2">${{ precio_promocional }}</h2>
-                                <span class="badge bg-warning text-dark fw-semibold">
-                                    ¡Ahorras ${{ producto.precio|sub:precio_promocional }}!
-                                </span>
+                                {% if user.is_staff or user.is_superuser %}
+                                    <h6 class="fw-semibold text-muted">Precio Base:</h6>
+                                    <h3 class="fw-bold mb-2">${{ producto.precio_base }}</h3>
+
+                                    <h6 class="fw-semibold text-success mt-3">Precio con Ganancia Aplicada:</h6>
+                                    <h2 class="fw-bold text-success">${{ producto.precio_final }}</h2>
+
+                                    <div class="mt-2">
+                                        <small class="text-muted">Margen aplicado: {{ producto.ganancia }}%</small>
+                                    </div>
+
+                                {% else %}
+                                    <h6 class="text-muted mb-1 fw-semibold">Precio Base:</h6>
+                                    <h4 class="text-decoration-line-through text-secondary mb-2">${{ producto.precio_base }}</h4>
+
+                                    <h6 class="text-success mb-1 fw-semibold">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h6>
+                                    <h2 class="text-success fw-bold mb-2">${{ precio_promocional }}</h2>
+
+                                    <span class="badge bg-warning text-dark fw-semibold">
+                                        ¡Ahorras ${{ ahorro|default:"0.00" }}!
+                                    </span>
+
+                                    <div class="mt-2">
+                                        <small class="text-muted">Ganancia aplicada: {{ producto.ganancia }}%</small>
+                                    </div>
+                                {% endif %}
+
                             </div>
+
 
                             <hr>
 
@@ -89,7 +106,6 @@
                         </div>
                     </div>
 
-                    <!-- Botones -->
                     <div class="mt-4 text-center">
                         <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-brown btn-lg me-2 fw-semibold">
                             Editar Producto
@@ -107,12 +123,11 @@
 
 <style>
 body {
-    background-color: #d8c3a5;
+    background-color: #a8dadc;
     font-family: 'Segoe UI', Roboto, sans-serif;
 }
 
-/* Tonos principales */
-.text-brown { color: #5a3825; }
+.text-brown { color: rgb(29, 53, 87); }
 
 .card { border-radius: 14px; }
 .price-section h4, .price-section h6 { line-height: 1.2; }
@@ -124,29 +139,27 @@ body {
     font-size: 1.1rem;
     color: #444;
 }
-.details-grid strong { color: #5a3825; }
+.details-grid strong { color: rgb(29, 53, 87); }
 
-/* Botones principales (mismo estilo que login y registro) */
 .btn-brown {
-    background-color: #5a3825;
+    background-color: rgb(29, 53, 87);
     color: white;
     border: none;
     transition: all 0.3s ease;
 }
 .btn-brown:hover {
-    background-color: #7b4b31;
+    background-color: rgb(29, 53, 87);
     color: white;
 }
 
-/* Botón contorno */
 .btn-outline-brown {
-    border: 1px solid #5a3825;
-    color: #5a3825;
+    border: 1px solid rgb(29, 53, 87);
+    color: rgb(29, 53, 87);
     background-color: transparent;
     transition: all 0.3s ease;
 }
 .btn-outline-brown:hover {
-    background-color: #5a3825;
+    background-color: #1d3557;
     color: white;
 }
 

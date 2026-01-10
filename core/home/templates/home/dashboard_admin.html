@@ -1,0 +1,37 @@
+{% extends "home/base.html" %}
+{% block titulo %}Dashboard{% endblock %}
+
+{% block contenido %}
+<div class="container text-center mt-5">
+    <h2 class="mb-4">¡Bienvenido, {{ user.username }}!</h2>
+    <p class="lead mb-5">Gestion de operaciones principales .</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-body">
+                    <i class="fas fa-boxes fa-4x text-primary mb-3"></i>
+                    <h4 class="card-title text-primary fw-bold">Gestión de Productos</h4>
+                    <p class="card-text">Revisa y actualiza el inventario de productos de la tienda.</p>
+                    <a href="{% url 'productos:lista' %}" class="btn btn-primary mt-3">
+                        <i class="fas fa-arrow-right"></i> Ir a Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-5 mb-4">
+            <div class="card shadow-lg border-0 h-100">
+                <div class="card-body">
+                    <i class="fas fa-shopping-cart fa-4x text-success mb-3"></i>
+                    <h4 class="card-title text-success fw-bold">Confirmacion de Pedidos</h4>
+                    <p class="card-text">Nuevas compras realizadas por clientes.</p>
+                    <a href="{% url 'compras:lista' %}" class="btn btn-success mt-3">
+                        <i class="fas fa-arrow-right"></i> Ir a Compras
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock contenido %}

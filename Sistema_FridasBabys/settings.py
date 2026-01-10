@@ -17,17 +17,14 @@ INSTALLED_APPS = [
 
     # Apps del proyecto
     'core.usuarios.apps.UsuariosConfig',
-    'core.clientes.apps.ClientesConfig',
     'core.pedidos.apps.PedidosConfig',
     'core.pagos.apps.PagosConfig',
     'core.productos.apps.ProductosConfig',
     'core.home.apps.HomeConfig',
-'core.compras.apps.ComprasConfig',
+    'core.compras.apps.ComprasConfig',
 
-
-# NUEVAS LIBRERÍAS DE FILTRO Y CORE
-'django.contrib.humanize',
-'mathfilters',
+    'django.contrib.humanize',
+    'mathfilters',
 
 ]
 
@@ -79,7 +76,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Guayaquil'
 USE_I18N = True
 USE_TZ = True
 
@@ -95,8 +92,24 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home:home'
 LOGOUT_REDIRECT_URL = 'login'
-# Archivos multimedia (imágenes subidas por los usuarios)
+# Archivos multimedia
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 AUTH_USER_MODEL = 'usuarios.Usuario'
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'core.productos.observer.inventario_observer': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

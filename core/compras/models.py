@@ -1,8 +1,16 @@
+"""
+Modelos de la aplicación Compras.
+"""
+
 from django.db import models
 from core.productos.models import Producto
 from core.usuarios.models import Usuario
 
+
 class Compra(models.Model):
+    """
+    Representa una compra realizada, asociada a un producto y a un usuario.
+    """
     producto = models.ForeignKey(Producto, on_delete=models.CASCADE, verbose_name="Producto")
     cantidad = models.PositiveIntegerField(verbose_name="Cantidad")
     fecha_compra = models.DateField(auto_now_add=True)

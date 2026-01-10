@@ -1,11 +1,6 @@
 from core.usuarios.models import Usuario
 
 class UsuarioFactory:
-    """
-    Patron Factory
-
-    Gestiona la creación de instancias de Usuario
-    """
 
     @staticmethod
     def crear_usuario(**datos):

@@ -1,0 +1,16 @@
+ """
+    subida a gitlab
+ git add .
+ git commit -m "Correccion de estructura"
+ git push
+ """
+Usuarios:
+ADMIN
+axelc
+1234
+VENDEDOR
+vendedor1
+123456V1
+CLIENTE
+cliente1
+123456C1
