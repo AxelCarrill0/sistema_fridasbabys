@@ -40,32 +40,35 @@ def procesar_pago(request, pago_id):
     pago = get_object_or_404(Pago, id=pago_id, usuario=request.user)
 
     if request.method == 'POST':
+
+        # 🔹 PAGO CON TARJETA
         if pago.metodo_pago == 'tarjeta':
             rostro_b64 = request.POST.get('rostro_verificacion')
 
             if rostro_b64:
                 try:
-                    # 1. Separar el encabezado de la base64
                     format, imgstr = rostro_b64.split(';base64,')
-                    ext = format.split('/')[-1]  # Obtiene 'jpeg' o 'png'
-
-                    # 2. Crear el nombre del archivo usando el ID del pago
+                    ext = format.split('/')[-1]
                     nombre_archivo = f"pago_{pago.id}_verificacion.{ext}"
-
-                    # 3. Convertir a archivo real de Django
                     data = ContentFile(base64.b64decode(imgstr), name=nombre_archivo)
 
-                    # 4. Guardar en el modelo y finalizar
                     pago.foto_verificacion = data
                     pago.save()
 
                     finalizar_pago(pago)
                     messages.success(request, "Identidad capturada y pago procesado.")
                     return redirect('pagos:detalle_pago', pago_id=pago.id)
-                except Exception as e:
+
+                except Exception:
                     messages.error(request, "Error al guardar la captura facial.")
             else:
                 messages.error(request, "Debe capturar su rostro para continuar.")
+
+        # 🔹 PAGO POR TRANSFERENCIA
+        elif pago.metodo_pago == 'transferencia':
+            finalizar_pago(pago)
+            messages.success(request, "Pago por transferencia confirmado.")
+            return redirect('pagos:detalle_pago', pago_id=pago.id)
 
     return render(request, f'pagos/pago_{pago.metodo_pago}.html', {'pago': pago})
 
