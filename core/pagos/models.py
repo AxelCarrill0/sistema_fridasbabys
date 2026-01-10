@@ -52,6 +52,12 @@ class Pago(models.Model):
         blank=True,
         verbose_name="Fecha de pago"
     )
+    foto_verificacion = models.ImageField(
+        upload_to='verificaciones/',
+        null=True,
+        blank=True,
+        verbose_name="Foto de Verificación"
+    )
 
     def __str__(self):
         return f"Pago #{self.id} - {self.usuario} - {self.estado}"

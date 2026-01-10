@@ -1,19 +1,12 @@
 {% extends "home/base_cliente.html" %}
 
 {% block contenido %}
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-lg-6">
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0 rounded-3 mb-4">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
-            {% endif %}
-
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body p-5">
                     <h3 class="text-center fw-bold mb-2">Pago con Tarjeta</h3>
@@ -25,33 +18,33 @@
                         </span>
                     </div>
 
-                    <form method="post" id="form-pago-tarjeta" action="{% url 'pagos:procesar_pago' pago.id %}">
+                    <form method="post" id="form-pago-tarjeta">
                         {% csrf_token %}
                         <input type="hidden" name="rostro_verificacion" id="rostro_data">
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nombre del titular</label>
-                            <input type="text" name="titular" class="form-control form-control-lg" placeholder="Nombre en tarjeta" required>
+                            <input type="text" id="titular" class="form-control form-control-lg" placeholder="Nombre en tarjeta" required>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Número de tarjeta</label>
-                            <input type="text" name="numero" class="form-control form-control-lg" placeholder="**** **** **** ****" required>
+                            <input type="text" id="n_tarjeta" class="form-control form-control-lg" placeholder="**** **** **** ****" maxlength="16" required>
                         </div>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">Vencimiento</label>
-                                <input type="text" name="vencimiento" class="form-control form-control-lg" placeholder="MM/AA" required>
+                                <input type="text" id="vence" class="form-control form-control-lg" placeholder="MM/AA" maxlength="5" required>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label fw-semibold">CVV</label>
-                                <input type="password" name="cvv" class="form-control form-control-lg" placeholder="***" required>
+                                <input type="password" id="cvv" class="form-control form-control-lg" placeholder="***" maxlength="3" required>
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary w-100 py-3 mt-3 rounded-3 fw-bold shadow-sm" onclick="iniciarVerificacion()">
-                            <i class="fas fa-user-shield me-2"></i> Verificar Identidad y Pagar
+                        <button type="button" class="btn btn-primary w-100 py-3 mt-3 rounded-3 fw-bold" onclick="validarYAbrirCamara()">
+                            <i class="fas fa-user-shield me-2"></i> Verificar y Pagar
                         </button>
                     </form>
                 </div>
@@ -61,23 +54,26 @@
 </div>
 
 <div id="modal-facial" class="modal-facial-overlay" style="display:none;">
-    <div class="modal-facial-content shadow-lg">
+    <div class="modal-facial-content">
         <h4 class="fw-bold text-dark">Escaneo Facial</h4>
-        <p class="small text-muted">Por favor, mantén tu rostro dentro del círculo</p>
+        <p class="small text-muted">Alinea tu rostro para confirmar el pago</p>
 
-        <div class="video-container shadow-sm">
+        <div class="video-container">
             <video id="video" autoplay muted playsinline></video>
-            <div class="face-guide"></div>
+            <div id="face-guide" class="face-guide"></div>
             <canvas id="canvas" style="display:none;"></canvas>
         </div>
 
-        <div id="scan-status" class="mt-3 fw-bold text-primary">Esperando cámara...</div>
+        <div id="scan-status" class="mt-3 fw-bold text-danger">
+            <i class="fas fa-sync fa-spin me-2"></i>Cargando cámara...
+        </div>
 
-        <div class="d-flex gap-2 mt-4">
-            <button class="btn btn-success flex-grow-1 py-2 fw-bold" id="btn-capturar">
-                <i class="fas fa-camera me-2"></i> Capturar Rostro
+        <div class="d-flex flex-column gap-2 mt-4">
+            <button class="btn btn-success py-2 fw-bold" id="btn-capturar" disabled>Capturar Rostro</button>
+            <button class="btn btn-warning btn-sm" id="btn-ayuda" style="display:none;" onclick="forzarHabilitacion()">
+                ¿No te detecta? Capturar manualmente
             </button>
-            <button class="btn btn-light py-2" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-light" onclick="cerrarModal()">Cancelar</button>
         </div>
     </div>
 </div>
@@ -85,73 +81,129 @@
 <style>
     .modal-facial-overlay {
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.8); z-index: 9999; display: flex; align-items: center; justify-content: center;
+        background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center;
         backdrop-filter: blur(5px);
     }
     .modal-facial-content {
-        background: white; padding: 2.5rem; border-radius: 30px; text-align: center; max-width: 450px; width: 95%;
+        background: white; padding: 2rem; border-radius: 25px; text-align: center; max-width: 400px; width: 90%;
     }
     .video-container {
         position: relative; width: 280px; height: 280px; margin: 0 auto;
-        border-radius: 50%; overflow: hidden; border: 5px solid #0d6efd;
+        border-radius: 50%; overflow: hidden; border: 5px solid #dc3545;
+        transition: all 0.3s ease;
     }
-    #video { width: 100%; height: 100%; object-fit: cover; }
+    #video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
     .face-guide {
         position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-        width: 85%; height: 85%; border: 2px dashed rgba(255,255,255,0.6); border-radius: 50%;
+        width: 75%; height: 75%; border: 2px dashed rgba(255,255,255,0.5); border-radius: 50%;
     }
+    .border-success-active { border-color: #198754 !important; box-shadow: 0 0 15px rgba(25, 135, 84, 0.5); }
 </style>
 
 <script>
 let stream;
+let model;
+let isDetecting = false;
+let detectTimer;
 const modal = document.getElementById('modal-facial');
 const video = document.getElementById('video');
-const form = document.getElementById('form-pago-tarjeta');
+const btnCapturar = document.getElementById('btn-capturar');
+const btnAyuda = document.getElementById('btn-ayuda');
+const scanStatus = document.getElementById('scan-status');
+const videoContainer = document.querySelector('.video-container');
+
+// Carga asíncrona del modelo
+async function loadFaceModel() {
+    model = await blazeface.load();
+    console.log("IA Lista");
+}
+loadFaceModel();
+
+function validarYAbrirCamara() {
+    const campos = ['titular', 'n_tarjeta', 'vence', 'cvv'];
+    let valido = true;
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (!el.value.trim()) { el.classList.add('is-invalid'); valido = false; }
+        else { el.classList.remove('is-invalid'); }
+    });
+
+    if (!valido) return alert("Complete los datos de la tarjeta.");
+    iniciarVerificacion();
+}
 
 async function iniciarVerificacion() {
-    // Validar campos básicos antes de abrir cámara
-    if (!form.checkValidity()) {
-        form.reportValidity();
-        return;
-    }
-
     try {
-        stream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 400 } });
+        // Resolución mejorada para detectar con lentes
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 640, height: 480 }
+        });
         video.srcObject = stream;
-        modal.style.display = 'flex';
-        document.getElementById('scan-status').innerText = "Apunta a tu rostro";
+
+        video.onloadedmetadata = () => {
+            modal.style.display = 'flex';
+            isDetecting = true;
+            detectFace();
+            // Mostrar botón de ayuda tras 8 segundos si no hay detección
+            detectTimer = setTimeout(() => { if(isDetecting) btnAyuda.style.display = 'block'; }, 8000);
+        };
     } catch (err) {
-        alert("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
-        console.error(err);
+        alert("Error de cámara: " + err);
     }
 }
 
-document.getElementById('btn-capturar').addEventListener('click', function() {
+async function detectFace() {
+    if (!isDetecting) return;
+
+    if (video.readyState === 4) {
+        const predictions = await model.estimateFaces(video, false);
+
+        if (predictions.length > 0) {
+            scanStatus.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>Rostro Detectado';
+            scanStatus.className = "mt-3 fw-bold text-success";
+            videoContainer.classList.add('border-success-active');
+            btnCapturar.disabled = false;
+            btnAyuda.style.display = 'none'; // Ocultar ayuda si detecta
+        } else {
+            scanStatus.innerHTML = '<i class="fas fa-search me-2"></i>Buscando rostro...';
+            scanStatus.className = "mt-3 fw-bold text-danger";
+            videoContainer.classList.remove('border-success-active');
+            btnCapturar.disabled = true;
+        }
+    }
+    requestAnimationFrame(detectFace);
+}
+
+function forzarHabilitacion() {
+    alert("Detección manual habilitada. Asegúrate de que tu rostro sea visible.");
+    btnCapturar.disabled = false;
+    scanStatus.innerHTML = '<i class="fas fa-exclamation-triangle text-warning me-2"></i>Modo Manual Activo';
+}
+
+btnCapturar.addEventListener('click', function() {
+    isDetecting = false;
+    clearTimeout(detectTimer);
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
     canvas.width = 400;
     canvas.height = 400;
-
-    // Capturar frame
     context.drawImage(video, 0, 0, 400, 400);
 
-    // Convertir a base64
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-    document.getElementById('rostro_data').value = dataUrl;
+    document.getElementById('rostro_data').value = canvas.toDataURL('image/jpeg');
+    scanStatus.innerHTML = '<i class="fas fa-check-circle text-success"></i> Verificación Exitosa';
 
-    document.getElementById('scan-status').innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Procesando identidad...';
-    this.disabled = true;
-
-    // Detener cámara y enviar automáticamente
     setTimeout(() => {
         if(stream) stream.getTracks().forEach(track => track.stop());
-        form.submit();
-    }, 800);
+        document.getElementById('form-pago-tarjeta').submit();
+    }, 1000);
 });
 
 function cerrarModal() {
+    isDetecting = false;
+    clearTimeout(detectTimer);
     if(stream) stream.getTracks().forEach(track => track.stop());
     modal.style.display = 'none';
+    btnAyuda.style.display = 'none';
 }
 </script>
 {% endblock %}
