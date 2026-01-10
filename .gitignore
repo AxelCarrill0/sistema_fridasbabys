@@ -18,5 +18,8 @@ __pycache__/
 .env
 *.local
 
-# Carpeta de medios (Fotos de verificación que se suban en local)
 media/
+core/productos/media/
+*.jpeg
+*.jpg
+*.png
