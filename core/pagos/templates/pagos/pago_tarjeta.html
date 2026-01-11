@@ -13,18 +13,14 @@
 
                     <div class="text-center mb-4">
                         <h3 class="fw-bold mb-1">Pago Seguro con Tarjeta</h3>
-                        <p class="text-muted mb-0">
-                            Verificación facial obligatoria
-                        </p>
+                        <p class="text-muted mb-0">Verificación facial obligatoria</p>
                         <div class="divider mx-auto mt-3"></div>
                     </div>
 
                     <div class="text-center mb-4">
                         <div class="total-box mx-auto">
                             <span>Total a pagar</span>
-                            <strong class="fs-3 d-block">
-                                ${{ pago.total|floatformat:2 }}
-                            </strong>
+                            <strong class="fs-3 d-block">${{ pago.total|floatformat:2 }}</strong>
                         </div>
                     </div>
 
@@ -54,9 +50,10 @@
                         </div>
 
                         <button type="button"
-                                class="btn btn-primary w-100 py-3 rounded-3 fw-bold mt-3"
-                                onclick="validarYAbrirCamara()">
-                            🔒 Verificar identidad y pagar
+                                id="btn-iniciar-proceso"
+                                class="btn btn-secondary w-100 py-3 rounded-3 fw-bold mt-3"
+                                onclick="validarYAbrirCamara()" disabled>
+                            ⏳ Cargando sistema de seguridad...
                         </button>
                     </form>
 
@@ -67,14 +64,11 @@
     </div>
 </div>
 
-<!-- MODAL FACIAL -->
 <div id="modal-facial" class="modal-facial-overlay" style="display:none;">
     <div class="modal-facial-content">
 
         <h4 class="fw-bold mb-1">Escaneo Facial</h4>
-        <p class="text-muted small mb-3">
-            Alinea tu rostro dentro del círculo
-        </p>
+        <p class="text-muted small mb-3">Mire fijamente a la cámara</p>
 
         <div class="video-container">
             <video id="video" autoplay muted playsinline></video>
@@ -82,24 +76,19 @@
             <canvas id="canvas" style="display:none;"></canvas>
         </div>
 
-        <div id="scan-status" class="mt-3 fw-bold text-danger">
-            Cargando cámara...
+        <div id="scan-status" class="mt-3 fw-bold text-warning">
+            Iniciando cámara...
         </div>
 
+        <p id="timer-text" class="text-muted small mt-1">Tiempo restante: 20s</p>
+
         <div class="d-flex flex-column gap-2 mt-4">
-            <button class="btn btn-success fw-bold" id="btn-capturar" disabled>
-                Confirmar rostro
+            <button class="btn btn-success fw-bold py-2" id="btn-capturar" disabled>
+                📸 Confirmar Rostro
             </button>
 
-            <button class="btn btn-outline-warning btn-sm"
-                    id="btn-ayuda"
-                    style="display:none;"
-                    onclick="forzarHabilitacion()">
-                Captura manual
-            </button>
-
-            <button class="btn btn-light" onclick="cerrarModal()">
-                Cancelar
+            <button class="btn btn-light" onclick="cancelarVerificacion()">
+                Cancelar operación
             </button>
         </div>
 
@@ -107,156 +96,202 @@
 </div>
 
 <style>
-.divider {
-    width: 70px;
-    height: 4px;
-    background: linear-gradient(90deg, #1d3557, #2a9d8f);
-    border-radius: 10px;
-}
+/* Estilos visuales */
+.divider { width: 70px; height: 4px; background: linear-gradient(90deg, #1d3557, #2a9d8f); border-radius: 10px; }
+.total-box { background: #f8f9fa; border-radius: 16px; padding: 18px 28px; display: inline-block; box-shadow: inset 0 0 0 1px #e0e0e0; }
 
-.total-box {
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 18px 28px;
-    display: inline-block;
-    box-shadow: inset 0 0 0 1px #e0e0e0;
-}
+/* Modal Styles */
+.modal-facial-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 9999; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+.modal-facial-content { background: #fff; padding: 2rem; border-radius: 25px; width: 90%; max-width: 420px; text-align: center; position: relative; }
 
-.modal-facial-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    backdrop-filter: blur(6px);
-}
+/* Video Circular */
+.video-container { position: relative; width: 260px; height: 260px; margin: 0 auto; border-radius: 50%; overflow: hidden; border: 5px solid #ccc; transition: 0.3s; background-color: #000; }
+#video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); } /* Efecto espejo */
 
-.modal-facial-content {
-    background: #fff;
-    padding: 2rem;
-    border-radius: 25px;
-    width: 90%;
-    max-width: 420px;
-    text-align: center;
-}
+/* Estados del borde */
+.border-scanning { border-color: #ffc107 !important; }
+.border-success-active { border-color: #198754 !important; box-shadow: 0 0 20px rgba(25,135,84,0.6); }
 
-.video-container {
-    position: relative;
-    width: 280px;
-    height: 280px;
-    margin: 0 auto;
-    border-radius: 50%;
-    overflow: hidden;
-    border: 5px solid #dc3545;
-    transition: 0.3s;
-}
-
-#video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transform: scaleX(-1);
-}
-
-.face-guide {
-    position: absolute;
-    inset: 12%;
-    border: 2px dashed rgba(255,255,255,0.6);
-    border-radius: 50%;
-}
-
-.border-success-active {
-    border-color: #198754 !important;
-    box-shadow: 0 0 18px rgba(25,135,84,0.5);
-}
+/* Guía visual */
+.face-guide { position: absolute; inset: 15%; border: 2px dashed rgba(255,255,255,0.7); border-radius: 50%; z-index: 10; pointer-events: none; }
 </style>
 
 <script>
-let stream, model, isDetecting = false, detectTimer;
-const modal = document.getElementById('modal-facial');
+let stream = null;
+let model = null;
+let isDetecting = false;
+let timeoutID = null;
+let countdownInterval = null;
+
+// Elementos del DOM
 const video = document.getElementById('video');
+const modal = document.getElementById('modal-facial');
 const btnCapturar = document.getElementById('btn-capturar');
-const btnAyuda = document.getElementById('btn-ayuda');
 const scanStatus = document.getElementById('scan-status');
 const videoContainer = document.querySelector('.video-container');
+const btnIniciar = document.getElementById('btn-iniciar-proceso');
+const timerText = document.getElementById('timer-text');
 
+// 1. Cargar modelo BlazeFace al inicio
 async function loadFaceModel() {
-    model = await blazeface.load();
+    try {
+        console.log("Cargando modelo...");
+        model = await blazeface.load();
+        console.log("Modelo cargado.");
+
+        // Habilitar botón de pago
+        btnIniciar.disabled = false;
+        btnIniciar.classList.remove('btn-secondary');
+        btnIniciar.classList.add('btn-primary');
+        btnIniciar.innerHTML = "🔒 Verificar identidad y pagar";
+    } catch (err) {
+        console.error("Error cargando modelo:", err);
+        alert("Error al cargar sistema de seguridad. Recargue la página.");
+    }
 }
 loadFaceModel();
 
+// 2. Validar formulario antes de abrir cámara
 function validarYAbrirCamara() {
     const campos = ['titular','n_tarjeta','vence','cvv'];
     let ok = true;
-
     campos.forEach(id => {
         const el = document.getElementById(id);
         if(!el.value.trim()){ el.classList.add('is-invalid'); ok=false; }
         else el.classList.remove('is-invalid');
     });
 
-    if(!ok) return alert("Complete todos los datos de la tarjeta.");
-    iniciarVerificacion();
+    if(!ok) return alert("Por favor, complete todos los datos de la tarjeta.");
+
+    abrirModalCamara();
 }
 
-async function iniciarVerificacion() {
-    stream = await navigator.mediaDevices.getUserMedia({ video:{ width:640, height:480 } });
-    video.srcObject = stream;
+// 3. Abrir cámara y temporizadores
+async function abrirModalCamara() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: { width: 400, height: 400, facingMode: "user" }
+        });
+        video.srcObject = stream;
 
-    modal.style.display = 'flex';
-    isDetecting = true;
-    detectFace();
+        // Esperar a que el video tenga metadata para empezar a detectar
+        video.onloadedmetadata = () => {
+            video.play();
+            modal.style.display = 'flex';
+            isDetecting = true;
+            detectFaceLoop(); // Iniciar bucle de IA
+            iniciarTemporizadorCancelacion(); // Iniciar cuenta regresiva de 20s
+        };
 
-    detectTimer = setTimeout(() => {
-        if(isDetecting) btnAyuda.style.display = 'block';
-    }, 8000);
+    } catch (err) {
+        alert("No se pudo acceder a la cámara. Verifique los permisos.");
+        console.error(err);
+    }
 }
 
-async function detectFace() {
-    if(!isDetecting) return;
+// 4. Temporizador de 20 segundos (Cuenta regresiva)
+function iniciarTemporizadorCancelacion() {
+    let timeLeft = 20;
+    timerText.textContent = `Tiempo restante: ${timeLeft}s`;
 
+    // Intervalo visual (cada segundo)
+    countdownInterval = setInterval(() => {
+        timeLeft--;
+        timerText.textContent = `Tiempo restante: ${timeLeft}s`;
+        if (timeLeft <= 5) timerText.classList.add('text-danger');
+    }, 1000);
+
+    // Timeout funcional (a los 20 segundos cierra todo)
+    timeoutID = setTimeout(() => {
+        cancelarVerificacion("Tiempo agotado. No se detectó un rostro válido.");
+    }, 20000);
+}
+
+// 5. Bucle de Detección Facial (Loop infinito hasta detectar o cancelar)
+async function detectFaceLoop() {
+    if (!isDetecting || !model) return;
+
+    // Predicción de BlazeFace
     const predictions = await model.estimateFaces(video, false);
-    if(predictions.length > 0){
-        scanStatus.textContent = "Rostro detectado";
+
+    if (predictions.length > 0) {
+        // --- ROSTRO ENCONTRADO ---
+        scanStatus.textContent = "¡Rostro verificado!";
         scanStatus.className = "mt-3 fw-bold text-success";
+
+        videoContainer.classList.remove('border-scanning');
         videoContainer.classList.add('border-success-active');
+
+        // HABILITAR BOTÓN DE CAPTURA
         btnCapturar.disabled = false;
-        btnAyuda.style.display = 'none';
+
     } else {
+        // --- NO HAY ROSTRO ---
         scanStatus.textContent = "Buscando rostro...";
-        scanStatus.className = "mt-3 fw-bold text-danger";
+        scanStatus.className = "mt-3 fw-bold text-warning";
+
         videoContainer.classList.remove('border-success-active');
+        videoContainer.classList.add('border-scanning');
+
+        // DESHABILITAR BOTÓN DE CAPTURA
         btnCapturar.disabled = true;
     }
-    requestAnimationFrame(detectFace);
+
+    // Volver a ejecutar en el siguiente frame
+    if (isDetecting) {
+        requestAnimationFrame(detectFaceLoop);
+    }
 }
 
-function forzarHabilitacion(){
-    btnCapturar.disabled = false;
-    scanStatus.textContent = "Modo manual activo";
-}
-
+// 6. Capturar foto y enviar formulario
 btnCapturar.onclick = () => {
-    isDetecting = false;
-    clearTimeout(detectTimer);
+    isDetecting = false; // Detener IA
+    limpiarTemporizadores();
 
+    // Dibujar video en canvas
     const canvas = document.getElementById('canvas');
-    canvas.width = 400; canvas.height = 400;
-    canvas.getContext('2d').drawImage(video,0,0,400,400);
-    document.getElementById('rostro_data').value = canvas.toDataURL();
+    const ctx = canvas.getContext('2d');
+    canvas.width = 400;
+    canvas.height = 400;
 
-    stream.getTracks().forEach(t=>t.stop());
+    // Dibujar imagen (espejada si es necesario, o normal)
+    ctx.drawImage(video, 0, 0, 400, 400);
+
+    // Guardar en input hidden
+    const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+    document.getElementById('rostro_data').value = dataURL;
+
+    // Detener cámara
+    detenerCamara();
+
+    // Enviar formulario al backend
     document.getElementById('form-pago-tarjeta').submit();
 };
 
-function cerrarModal(){
+// 7. Funciones de limpieza y cierre
+function detenerCamara() {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+    }
+}
+
+function limpiarTemporizadores() {
+    clearTimeout(timeoutID);
+    clearInterval(countdownInterval);
+}
+
+function cancelarVerificacion(mensaje = null) {
     isDetecting = false;
-    clearTimeout(detectTimer);
-    if(stream) stream.getTracks().forEach(t=>t.stop());
+    detenerCamara();
+    limpiarTemporizadores();
     modal.style.display = 'none';
-    btnAyuda.style.display = 'none';
+
+    if (mensaje) {
+        alert(mensaje);
+        // Opcional: Redirigir si quieres sacar al usuario de la pantalla de pago
+        // window.location.href = "{% url 'pagos:detalle_pago' pago.id %}";
+    }
 }
 </script>
 {% endblock %}

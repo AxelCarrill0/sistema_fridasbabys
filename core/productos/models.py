@@ -6,7 +6,6 @@ from decimal import Decimal
 from django.db import models
 from core.usuarios.models import Usuario
 
-
 class Producto(models.Model):
     """
     Modelo que representa un producto disponible en la tienda.
@@ -31,6 +30,13 @@ class Producto(models.Model):
     ganancia = models.DecimalField(
         max_digits=5, decimal_places=2, default=20, verbose_name="Ganancia %"
     )
+
+    # --- NUEVO CAMPO: Descuento aplicable por teclado ---
+    descuento = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0, verbose_name="Descuento %"
+    )
+    # ----------------------------------------------------
+
     precio_final = models.DecimalField(
         max_digits=10, decimal_places=2, default=1, verbose_name="Precio venta"
     )
@@ -57,13 +63,21 @@ class Producto(models.Model):
             f"{self.nombre} | Precio final: ${self.precio_final} | Stock: {self.stock}"
         )
 
-    def calcular_precio_final(self):
+    def save(self, *args, **kwargs):
         """
-        Calcula el precio final del producto usando el precio base y porcentaje de ganancia.
+        Calcula el precio final automáticamente antes de guardar.
+        Fórmula: (Precio Base + Ganancia) - Descuento = Precio Final
         """
-        return (
-            self.precio_base * (1 + (self.ganancia / 100))
-        ).quantize(Decimal("0.01"))
+        # 1. Calcular el precio de lista (Base + Ganancia)
+        precio_con_ganancia = self.precio_base * (1 + (self.ganancia / Decimal('100')))
+
+        # 2. Calcular el monto a descontar según el porcentaje ingresado por teclado
+        monto_descuento = precio_con_ganancia * (self.descuento / Decimal('100'))
+
+        # 3. Restar el descuento para obtener el precio final de venta
+        self.precio_final = (precio_con_ganancia - monto_descuento).quantize(Decimal("0.01"))
+
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Producto"

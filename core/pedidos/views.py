@@ -179,40 +179,51 @@ def cancelar_pedido(request, pedido_id):
 @login_required
 @transaction.atomic
 def confirmar_compra(request):
-    """
-    Confirma los pedidos pendientes del usuario y crea un pago asociado.
-    Redirige a la selección de método de pago si todo es correcto.
-    """
     if request.method != "POST":
         return redirect('pedidos:lista_pedidos')
 
     user = request.user
 
-    pago_pendiente = Pago.objects.filter(
-        usuario=user,
-        estado='pendiente'
-    ).first()
-
-    if pago_pendiente:
-        return redirect('pagos:seleccionar_metodo', pago_id=pago_pendiente.id)
-
+    # 1. Obtenemos TODOS los pedidos pendientes (nuevos y viejos)
     pedidos = Pedido.objects.filter(
         cliente=user,
-        estado='pendiente',
-        pago__isnull=True
+        estado='pendiente'
     )
 
     if not pedidos.exists():
         messages.warning(request, "No tienes pedidos pendientes para confirmar.")
         return redirect('pedidos:lista_pedidos')
 
-    total = sum(pedido.producto.precio_final * pedido.cantidad for pedido in pedidos)
+    # 2. Recalculamos el TOTAL de todo lo que hay en el carrito ahora mismo
+    facade = ProductoFacade()
+    total = decimal.Decimal('0.00')
 
-    pago = Pago.objects.create(
-        usuario=user,
-        total=total
-    )
+    for pedido in pedidos:
+        producto = facade.obtener_producto(pedido.producto.id)
+        componente = ProductoComponent(producto)
+        descuento = decimal.Decimal('10')
+        producto_decorado = DescuentoPorcentajeDecorator(componente, descuento)
+        precio_final = producto_decorado.get_precio_final()
+        total += precio_final * pedido.cantidad
 
+    # 3. Buscamos si ya existe un pago pendiente o creamos uno nuevo
+    pago = Pago.objects.filter(usuario=user, estado='pendiente').first()
+
+    if pago:
+        # Si ya existe, actualizamos el total con los nuevos productos
+        pago.total = total
+        pago.save()
+    else:
+        # Si no existe, lo creamos
+        pago = Pago.objects.create(
+            usuario=user,
+            total=total,
+            estado='pendiente'
+        )
+
+    # 4. VINCULACIÓN CRÍTICA:
+    # Asignamos este pago a TODOS los pedidos pendientes encontrados.
+    # Esto arregla el problema de que no aparezcan.
     pedidos.update(pago=pago)
 
     messages.success(request, "Compra confirmada. Selecciona el método de pago.")

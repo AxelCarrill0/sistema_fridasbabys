@@ -4,18 +4,16 @@ Vistas de la aplicación Productos.
 
 from decimal import Decimal
 from django.db.models import Q
-from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from .facade.producto_facade import ProductoFacade
+# Importamos el Modelo y el Formulario
 from .models import Producto
 from .forms import ProductoForm
-from .decorator.producto_decorator import ProductoComponent, DescuentoPorcentajeDecorator
 
-facade = ProductoFacade()
-
+# NOTA: Hemos eliminado Facade y Decorator para permitir
+# que el cálculo del descuento manual del modelo funcione correctamente.
 
 @login_required
 def listar_productos(request):
@@ -25,16 +23,16 @@ def listar_productos(request):
     q = request.GET.get('q', '').strip()
     categoria = request.GET.get('categoria', '').strip()
 
-    # El administrador ve todos (incluso los no activos si quieres, o puedes filtrar)
-    productos = Producto.objects.all()
+    # Obtenemos todos los productos ordenados por id descendente (los nuevos primero)
+    productos = Producto.objects.all().order_by('-id')
 
-    # Filtro de búsqueda por texto
+    # 1. Filtro de búsqueda por texto (Nombre o Descripción)
     if q:
         productos = productos.filter(
             Q(nombre__icontains=q) | Q(descripcion__icontains=q)
         )
 
-    # Filtro por categoría
+    # 2. Filtro por categoría
     if categoria:
         productos = productos.filter(categoria=categoria)
 
@@ -42,20 +40,25 @@ def listar_productos(request):
         'productos': productos,
         'query': q,
         'categoria_actual': categoria,
-        'categorias': Producto.CATEGORIAS,  # Usando el nombre exacto de tu modelo
+        'categorias': Producto.CATEGORIAS,
     }
     return render(request, 'productos/listar.html', contexto)
+
 
 @login_required
 def crear_producto(request):
     """
-    Permite crear un nuevo producto mediante un formulario.
+    Permite crear un nuevo producto.
+    Al usar form.save(), se activa el cálculo automático de precios en models.py.
     """
     if request.method == "POST":
         form = ProductoForm(request.POST, request.FILES)
         if form.is_valid():
-            facade.crear_producto(**form.cleaned_data, creado_por=request.user)
-            messages.success(request, "Producto creado exitosamente.")
+            producto = form.save(commit=False)
+            producto.creado_por = request.user
+            # Al guardar aquí, se ejecuta la matemática: (Base + Ganancia) - Descuento
+            producto.save()
+            messages.success(request, f"Producto '{producto.nombre}' creado exitosamente.")
             return redirect("productos:lista")
     else:
         form = ProductoForm()
@@ -66,22 +69,17 @@ def crear_producto(request):
 @login_required
 def editar_producto(request, pk):
     """
-    Permite editar un producto existente.
+    Permite editar un producto. Si cambias el descuento aquí,
+    el precio final se recalculará automáticamente.
     """
     producto = get_object_or_404(Producto, pk=pk)
+
     if request.method == "POST":
         form = ProductoForm(request.POST, request.FILES, instance=producto)
         if form.is_valid():
-            datos_actualizacion = form.cleaned_data.copy()
-            if 'imagen' in datos_actualizacion:
-                del datos_actualizacion['imagen']
-
-            facade.actualizar_producto(producto.id, **datos_actualizacion)
-
-            if request.FILES:
-                form.save()
-
-            messages.success(request, "Producto actualizado exitosamente.")
+            # El método save() del modelo recalcula todo basado en los nuevos inputs
+            form.save()
+            messages.success(request, "Producto actualizado correctamente.")
             return redirect("productos:detalle", pk=producto.id)
     else:
         form = ProductoForm(instance=producto)
@@ -91,18 +89,15 @@ def editar_producto(request, pk):
 
 @login_required
 def eliminar_producto(request, pk):
+    """
+    Elimina un producto de la base de datos.
+    """
     producto = get_object_or_404(Producto, pk=pk)
 
     if request.method == "POST":
-        try:
-            facade.eliminar_producto(pk)
-            messages.success(
-                request,
-                f"El producto '{producto.nombre}' fue eliminado correctamente."
-            )
-        except ValueError as e:
-            messages.error(request, str(e))
-
+        nombre = producto.nombre
+        producto.delete()
+        messages.success(request, f"El producto '{nombre}' fue eliminado correctamente.")
         return redirect("productos:lista")
 
     return render(
@@ -111,83 +106,73 @@ def eliminar_producto(request, pk):
         {"producto": producto}
     )
 
+
 def detalle_producto(request, pk):
     """
-    Muestra la información detallada de un producto,
-    incluyendo el precio con descuento promocional.
+    Muestra la información detallada.
+    Calcula el 'Ahorro' visualmente para el cliente.
     """
     producto = get_object_or_404(Producto, pk=pk)
-    descuento_aplicado = Decimal(15)
-    precio_final = producto.precio_base
 
-    if not precio_final and hasattr(producto, 'precio'):
-        precio_final = producto.precio
+    # Lógica para mostrar cuánto se ahorra el cliente si hay descuento
+    ahorro = Decimal('0.00')
+    precio_antes = producto.precio_final # Valor por defecto
 
-    if hasattr(producto, 'precio_final') and producto.precio_final is not None:
-        precio_final = producto.precio_final
-
-    precio_promocional = (
-        precio_final * (Decimal(1) - descuento_aplicado / Decimal(100))
-    ).quantize(Decimal('0.01'))
-    ahorro = (precio_final - precio_promocional).quantize(Decimal('0.01'))
+    if producto.descuento > 0:
+        # Reconstruimos el precio "Original" (Precio base + ganancia)
+        # Esto es solo visual para mostrar el tachado
+        precio_antes = producto.precio_base * (1 + (producto.ganancia / Decimal('100')))
+        ahorro = precio_antes - producto.precio_final
 
     contexto = {
         'producto': producto,
-        'descuento_aplicado': descuento_aplicado,
-        'precio_promocional': precio_promocional,
         'ahorro': ahorro,
+        # 'precio_antes' sirve para mostrar el precio tachado si quieres usarlo en el template
+        'precio_antes': precio_antes.quantize(Decimal("0.01"))
     }
 
+    # Si es administrador, ve la vista interna
     if request.user.is_authenticated and request.user.is_staff:
         return render(request, 'productos/detalle.html', contexto)
 
+    # Si es cliente, ve la vista pública
     return render(request, 'productos/detalle_cliente.html', contexto)
 
 
 def catalogo_productos(request):
     """
-    Vista pública del catálogo con búsqueda mejorada y filtro de categorías.
+    Vista pública del catálogo.
+    Muestra los precios finales que YA tienen el descuento aplicado en la BD.
     """
     q = request.GET.get('q', '').strip()
     categoria = request.GET.get('categoria', '').strip()
 
-    # Base de productos activos
-    productos = Producto.objects.filter(activo=True)
+    # Solo mostramos productos activos
+    productos = Producto.objects.filter(activo=True).order_by('nombre')
 
-    # Filtro por búsqueda de texto (Nombre o Descripción)
+    # Filtro Búsqueda
     if q:
         productos = productos.filter(
             Q(nombre__icontains=q) | Q(descripcion__icontains=q)
         )
 
-    # Filtro por categoría (Si tu modelo Producto tiene el campo 'categoria')
+    # Filtro Categoría
     if categoria:
         productos = productos.filter(categoria=categoria)
 
-    # Aplicar decoradores de precio
-    productos_decorados = []
-    for p in productos:
-        componente = ProductoComponent(p)
-        descuento = Decimal(15)  # Puedes hacer esto dinámico si gustas
-        decorado = DescuentoPorcentajeDecorator(componente, descuento)
-        p.precio_final = decorado.get_precio_final()
-        productos_decorados.append(p)
-
-    # Obtener categorías únicas para el select del HTML
-    # Esto asume que usas choices en el modelo o es un CharField
-    categorias_disponibles = Producto.CATEGORIAS
     contexto = {
-        'productos': productos_decorados,
+        'productos': productos,
         'q': q,
         'categoria_actual': categoria,
-        'categorias': categorias_disponibles
+        'categorias': Producto.CATEGORIAS
     }
     return render(request, 'productos/catalogo.html', contexto)
+
 
 @login_required
 def subir_imagen(request, pk):
     """
-    Permite subir o actualizar la imagen de un producto.
+    Vista dedicada para actualizar solo la imagen.
     """
     producto = get_object_or_404(Producto, pk=pk)
 
@@ -195,7 +180,10 @@ def subir_imagen(request, pk):
         imagen_subida = request.FILES.get('imagen')
         if imagen_subida:
             producto.imagen = imagen_subida
-            producto.save()
+            producto.save() # Esto también recalcula el precio, pero es seguro.
+            messages.success(request, "Imagen actualizada correctamente.")
             return redirect('productos:detalle', pk=producto.pk)
+        else:
+            messages.warning(request, "No seleccionaste ninguna imagen.")
 
     return render(request, 'productos/subir_imagen.html', {'producto': producto})

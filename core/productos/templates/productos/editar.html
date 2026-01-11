@@ -4,47 +4,93 @@
 {% block contenido %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
+        <div class="col-lg-9 col-xl-8">
 
-            <div class="card shadow-lg border-0 form-card">
-                <div class="card-body p-4 p-md-5">
+            <div class="card shadow-sm border-0 rounded-4">
 
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold title-form">Editar Producto</h2>
-                        <p class="text-muted mb-0">{{ producto.nombre }}</p>
-                    </div>
+                <div class="card-header text-center py-4">
+                    <h3 class="fw-semibold mb-1 titulo-form">
+                        Editar Producto
+                    </h3>
+                    <small class="subtitulo-form">
+                        Estás modificando: <strong>{{ producto.nombre }}</strong>
+                    </small>
+                </div>
+
+                <div class="card-body px-4 px-md-5 py-4">
 
                     <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
 
-                        {% for field in form %}
-                            <div class="mb-3">
-                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold label-form">
-                                    {{ field.label }}
-                                </label>
-
-                                {{ field }}
-
-                                {% if field.errors %}
-                                    <div class="text-danger small mt-1">
-                                        {{ field.errors|join:", " }}
-                                    </div>
-                                {% endif %}
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger mb-4">
+                                {% for error in form.non_field_errors %}
+                                    <div>{{ error }}</div>
+                                {% endfor %}
                             </div>
-                        {% endfor %}
+                        {% endif %}
 
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-submit fw-semibold">
+                        <div class="mb-4">
+                            <h6 class="fw-semibold seccion-titulo mb-3">
+                                Información del producto
+                            </h6>
+
+                            <div class="row g-3">
+                                {% for field in form %}
+                                    <div class="col-md-6">
+                                        {% if field.field.widget.input_type != 'checkbox' %}
+                                            <label for="{{ field.id_for_label }}" class="form-label label-form">
+                                                {{ field.label }}
+                                            </label>
+                                        {% endif %}
+
+                                        {% if field.name == 'imagen' %}
+                                            <div class="image-field-wrapper p-2 border rounded bg-light">
+                                                {% if producto.imagen %}
+                                                    <div class="d-flex align-items-center mb-2 gap-3">
+                                                        <img src="{{ producto.imagen.url }}" alt="Actual" class="img-thumbnail" style="height: 60px; width: 60px; object-fit: cover;">
+                                                        <div class="small text-muted text-truncate">
+                                                            Actual: {{ producto.imagen.name }}
+                                                        </div>
+                                                    </div>
+                                                {% endif %}
+                                                <input type="file" name="{{ field.name }}" class="form-control form-control-sm" id="{{ field.id_for_label }}" accept="image/*">
+                                            </div>
+
+                                        {% elif field.field.widget.input_type == 'checkbox' %}
+                                            <div class="form-check mt-4">
+                                                {{ field }}
+                                                <label class="form-check-label label-form" for="{{ field.id_for_label }}">
+                                                    {{ field.label }}
+                                                </label>
+                                            </div>
+
+                                        {% else %}
+                                            {{ field }}
+                                        {% endif %}
+
+                                        {% for error in field.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ error }}
+                                            </div>
+                                        {% endfor %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end gap-3">
+                            <a href="{% url 'productos:lista' %}" class="btn btn-cancelar px-4">
+                                Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-guardar px-4">
                                 Guardar Cambios
                             </button>
                         </div>
-                    </form>
 
-                    <div class="text-center mt-3">
-                        <a href="{% url 'productos:lista' %}" class="back-link">
-                            ← Volver al listado
-                        </a>
-                    </div>
+                    </form>
 
                 </div>
             </div>
@@ -54,63 +100,28 @@
 </div>
 
 <style>
-/* CARD */
-.form-card {
-    border-radius: 18px;
-}
+    body { font-family: 'Inter', 'Segoe UI', sans-serif; }
+    .card-header { background-color: transparent; border-bottom: 1px solid #e5e7eb; }
+    .titulo-form { font-family: 'Poppins', 'Segoe UI', sans-serif; color: #1d3557; letter-spacing: 0.5px; }
+    .subtitulo-form { color: #6b7280; font-size: 0.95rem; }
+    .seccion-titulo { font-size: 0.85rem; letter-spacing: 0.12em; color: #6b7280; text-transform: uppercase; }
+    .label-form { font-weight: 500; color: #1f2937; }
 
-/* TÍTULO */
-.title-form {
-    color: #1d3557;
-    letter-spacing: 0.3px;
-}
+    /* Estilos generales de inputs */
+    input[type="text"], input[type="number"], select, textarea {
+        border-radius: 10px !important;
+        font-size: 0.95rem;
+    }
 
-/* LABELS */
-.label-form {
-    color: #1d3557;
-    font-size: 0.9rem;
-}
+    /* Estilo específico para el wrapper de la imagen */
+    .image-field-wrapper {
+        border-color: #dee2e6 !important;
+        background-color: #f8f9fa;
+    }
 
-/* INPUTS */
-input, select, textarea {
-    border-radius: 12px !important;
-    border: 1px solid #cfd8dc !important;
-    padding: 10px 12px !important;
-    width: 100%;
-    font-size: 0.95rem;
-    transition: all 0.25s ease;
-}
-
-input:focus, select:focus, textarea:focus {
-    border-color: #1d3557 !important;
-    box-shadow: 0 0 0 0.15rem rgba(29, 53, 87, 0.25);
-}
-
-/* BOTÓN */
-.btn-submit {
-    background-color: #1d3557;
-    color: #ffffff;
-    border: none;
-    border-radius: 14px;
-    padding: 12px;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-}
-
-.btn-submit:hover {
-    background-color: #16304f;
-    transform: translateY(-2px);
-}
-
-/* LINK */
-.back-link {
-    color: #1d3557;
-    font-weight: 500;
-    text-decoration: none;
-}
-
-.back-link:hover {
-    text-decoration: underline;
-}
+    .btn-guardar { background-color: #1d3557; color: #ffffff; border: none; }
+    .btn-guardar:hover { background-color: #16304f; color: #ffffff; }
+    .btn-cancelar { border: 1px solid #6b7280; color: #374151; background-color: transparent; display: flex; align-items: center; text-decoration: none; }
+    .btn-cancelar:hover { background-color: #f3f4f6; color: #1f2937; }
 </style>
 {% endblock %}

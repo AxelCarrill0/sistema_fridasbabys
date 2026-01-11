@@ -9,7 +9,6 @@
         <div class="col-md-10">
             <div class="card shadow-lg border-0 card-producto">
 
-                <!-- HEADER -->
                 <div class="card-header text-center py-4 header-producto">
                     <h2 class="mb-1 fw-semibold">{{ producto.nombre }}</h2>
                     <small class="opacity-75">Detalle del producto</small>
@@ -18,12 +17,16 @@
                 <div class="card-body p-5">
                     <div class="row align-items-center">
 
-                        <!-- IMAGEN + COMPRA -->
                         <div class="col-md-5 text-center mb-4 d-flex flex-column align-items-center">
 
                             {% if producto.imagen %}
-                                <div class="img-wrapper mb-4">
+                                <div class="img-wrapper mb-4 position-relative">
                                     <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                                    {% if producto.descuento > 0 %}
+                                        <span class="position-absolute top-0 start-0 badge bg-danger m-2 p-2 rounded-circle">
+                                            -{{ producto.descuento|floatformat:0 }}%
+                                        </span>
+                                    {% endif %}
                                 </div>
                             {% else %}
                                 <div class="img-wrapper mb-4 d-flex flex-column justify-content-center align-items-center">
@@ -53,7 +56,6 @@
                             {% endif %}
                         </div>
 
-                        <!-- INFO -->
                         <div class="col-md-7">
                             <h4 class="fw-semibold mb-3">Información General</h4>
                             <p class="lead text-muted">
@@ -62,28 +64,39 @@
 
                             <hr>
 
-                            <!-- PRECIO -->
                             <div class="price-section mb-4">
-                                <small class="text-muted">Precio original</small>
-                                <div class="base-price text-decoration-line-through text-secondary">
-                                    ${{ producto.precio_final }}
-                                </div>
+                                {% if producto.descuento > 0 %}
+                                    {% with descuento_monto=producto.precio_final|mul:producto.descuento|div:100 %}
+                                    {% with precio_promo=producto.precio_final|sub:descuento_monto %}
 
-                                <small class="text-success mt-3 d-block">
-                                    Precio promocional ({{ descuento_aplicado }}% Dcto)
-                                </small>
-                                <h1 class="fw-bold text-success">
-                                    ${{ precio_promocional }}
-                                </h1>
+                                        <small class="text-muted">Precio original</small>
+                                        <div class="base-price text-decoration-line-through text-secondary">
+                                            ${{ producto.precio_final|floatformat:2 }}
+                                        </div>
 
-                                <span class="badge bg-warning text-dark mt-2">
-                                    Ahorras ${{ ahorro|floatformat:2 }}
-                                </span>
+                                        <small class="text-success mt-3 d-block">
+                                            Precio promocional ({{ producto.descuento|floatformat:0 }}% OFF)
+                                        </small>
+                                        <h1 class="fw-bold text-success">
+                                            ${{ precio_promo|floatformat:2 }}
+                                        </h1>
+
+                                        <span class="badge bg-warning text-dark mt-2">
+                                            ¡Ahorras ${{ descuento_monto|floatformat:2 }}!
+                                        </span>
+
+                                    {% endwith %}
+                                    {% endwith %}
+                                {% else %}
+                                    <small class="text-muted">Precio</small>
+                                    <h1 class="fw-bold text-dark">
+                                        ${{ producto.precio_final|floatformat:2 }}
+                                    </h1>
+                                {% endif %}
                             </div>
 
                             <hr>
 
-                            <!-- DETALLES -->
                             <div class="details-grid">
                                 <div>
                                     <strong>Stock:</strong>
@@ -99,7 +112,6 @@
                         </div>
                     </div>
 
-                    <!-- VOLVER -->
                     <div class="mt-5 text-center">
                         <a href="{% url 'productos:catalogo' %}" class="btn btn-outline-custom btn-lg">
                             <i class="fas fa-arrow-left me-1"></i> Volver al Catálogo
@@ -113,79 +125,19 @@
 </div>
 
 <style>
-
-body {
-    font-family: 'Poppins', 'Segoe UI', sans-serif;
-}
-
-.card-producto {
-    border-radius: 18px;
-    overflow: hidden;
-}
-
-.header-producto {
-    background-color: #5d677a;
-    color: white;
-}
-
-.img-wrapper {
-    background: #f8f9fa;
-    padding: 22px;
-    border-radius: 18px;
-    box-shadow: 0 10px 25px rgba(0,0,0,.08);
-}
-
-.img-wrapper img {
-    max-height: 320px;
-    object-fit: contain;
-    transition: transform .3s ease;
-}
-
-.img-wrapper img:hover {
-    transform: scale(1.05);
-}
-
-.input-cantidad {
-    width: 90px;
-    border-radius: 10px;
-}
-
-.btn-add {
-    background-color: #5d677a;
-    color: #fff;
-    border: none;
-    padding: 12px 30px;
-    border-radius: 12px;
-    transition: all .3s ease;
-}
-
-.btn-add:hover {
-    background-color: #4b5566;
-    transform: translateY(-2px);
-}
-
-.btn-outline-custom {
-    border: 2px solid #5d677a;
-    color: #5d677a;
-    border-radius: 12px;
-    padding: 12px 30px;
-    transition: all .3s ease;
-}
-
-.btn-outline-custom:hover {
-    background-color: #5d677a;
-    color: white;
-}
-
-.base-price {
-    font-size: 1.2rem;
-}
-
-
-.details-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-}
+/* Se mantienen tus estilos */
+body { font-family: 'Poppins', 'Segoe UI', sans-serif; }
+.card-producto { border-radius: 18px; overflow: hidden; }
+.header-producto { background-color: #5d677a; color: white; }
+.img-wrapper { background: #f8f9fa; padding: 22px; border-radius: 18px; box-shadow: 0 10px 25px rgba(0,0,0,.08); }
+.img-wrapper img { max-height: 320px; object-fit: contain; transition: transform .3s ease; }
+.img-wrapper img:hover { transform: scale(1.05); }
+.input-cantidad { width: 90px; border-radius: 10px; }
+.btn-add { background-color: #5d677a; color: #fff; border: none; padding: 12px 30px; border-radius: 12px; transition: all .3s ease; }
+.btn-add:hover { background-color: #4b5566; transform: translateY(-2px); }
+.btn-outline-custom { border: 2px solid #5d677a; color: #5d677a; border-radius: 12px; padding: 12px 30px; transition: all .3s ease; }
+.btn-outline-custom:hover { background-color: #5d677a; color: white; }
+.base-price { font-size: 1.2rem; }
+.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 </style>
 {% endblock %}

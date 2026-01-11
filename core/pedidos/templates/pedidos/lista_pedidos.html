@@ -7,6 +7,11 @@
     <div class="card shadow-lg border-0 rounded-4 main-card">
         <div class="card-body p-5">
 
+            <div class="d-flex justify-content-start mb-2">
+                <a href="{% url 'productos:catalogo' %}" class="btn btn-link text-decoration-none text-secondary px-0 fw-semibold">
+                    <i class="fas fa-arrow-left me-2"></i> Seguir comprando
+                </a>
+            </div>
             <h2 class="text-center fw-bold mb-2 title-main">Mis Pedidos</h2>
             <p class="text-center subtitle mb-5">Resumen de tus compras y pedidos</p>
 
@@ -79,7 +84,11 @@
                 </div>
 
             {% else %}
-                <p class="text-center text-muted fs-5">No tienes pedidos pendientes.</p>
+                <div class="text-center py-5">
+                    <i class="fas fa-shopping-basket fa-3x text-muted mb-3"></i>
+                    <p class="text-muted fs-5">No tienes pedidos pendientes.</p>
+                    <a href="{% url 'productos:catalogo' %}" class="btn btn-primary mt-2">Ir al catálogo</a>
+                </div>
             {% endif %}
 
             {% if enviados %}
@@ -195,6 +204,12 @@
 }
 .modal-custom {
     padding: 10px;
+}
+/* Efecto hover suave para el botón de volver */
+.btn-link:hover {
+    color: #1d3557 !important;
+    transform: translateX(-5px);
+    transition: transform 0.2s ease;
 }
 </style>
 {% endblock %}

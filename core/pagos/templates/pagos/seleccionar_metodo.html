@@ -1,4 +1,5 @@
 {% extends "home/base_cliente.html" %}
+{% load mathfilters %}
 
 {% block contenido %}
 <div class="container my-5">
@@ -9,131 +10,104 @@
                 <div class="card-body p-5">
 
                     <div class="text-center mb-4">
-                        <h2 class="fw-bold payment-title mb-2">
-                            Método de Pago
-                        </h2>
-                        <p class="text-muted mb-0">
-                            Selecciona cómo deseas completar tu compra
-                        </p>
+                        <h2 class="fw-bold payment-title mb-2">Método de Pago</h2>
+                        <p class="text-muted mb-0">Revisa el desglose antes de pagar</p>
                         <div class="divider mx-auto mt-3"></div>
                     </div>
 
-                    <div class="text-center mb-5">
-                        <div class="total-box mx-auto">
-                            <span>Total a pagar</span>
-                            <strong class="d-block fs-3">
-                                ${{ pago.total|floatformat:2 }}
-                            </strong>
+                    <div class="card bg-light border-0 mb-4">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal (Sin IVA):</span>
+                                <span>${{ resumen.subtotal|floatformat:2 }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>IVA (15%):</span>
+                                <span>${{ resumen.iva|floatformat:2 }}</span>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-bold fs-5">Total a Pagar:</span>
+                                <strong class="fs-3 text-primary">${{ resumen.total|floatformat:2 }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mb-4">
+                        <button class="btn btn-sm btn-link text-decoration-none" type="button" data-bs-toggle="collapse" data-bs-target="#resumenCompra">
+                            Ver desglose detallado de productos <i class="fas fa-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <div class="collapse mb-4" id="resumenCompra">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-borderless">
+                                <thead class="text-muted border-bottom">
+                                    <tr>
+                                        <th>Prod.</th>
+                                        <th class="text-end">P. Base</th>
+                                        <th class="text-end">Desc.</th>
+                                        <th class="text-end">IVA</th>
+                                        <th class="text-end fw-bold">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in pedidos_detalle %}
+                                    <tr>
+                                        <td>{{ item.producto.nombre }} <small class="text-muted">x{{ item.cantidad }}</small></td>
+                                        <td class="text-end">${{ item.precio_base_unit|floatformat:2 }}</td>
+                                        <td class="text-end text-danger">-${{ item.monto_desc_unit|floatformat:2 }}</td>
+                                        <td class="text-end">${{ item.monto_iva_unit|floatformat:2 }}</td>
+                                        <td class="text-end fw-bold">${{ item.precio_final_unit|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
                     <div class="row g-4">
-
                         <div class="col-md-6">
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="metodo" value="tarjeta">
-
-                                <button type="submit" class="payment-card card-tarjeta">
+                                <button type="submit" class="payment-card card-tarjeta h-100 w-100">
                                     <div class="icon">💳</div>
                                     <h5>Tarjeta</h5>
-                                    <p>Pago inmediato y seguro</p>
+                                    <p class="small">Verificación Facial</p>
                                 </button>
                             </form>
                         </div>
-
                         <div class="col-md-6">
                             <form method="post">
                                 {% csrf_token %}
                                 <input type="hidden" name="metodo" value="transferencia">
-
-                                <button type="submit" class="payment-card card-transferencia">
+                                <button type="submit" class="payment-card card-transferencia h-100 w-100">
                                     <div class="icon">🏦</div>
                                     <h5>Transferencia</h5>
-                                    <p>Escaneo de código QR</p>
+                                    <p class="small">Subir Comprobante</p>
                                 </button>
                             </form>
                         </div>
-
                     </div>
 
-                    <div class="text-center mt-5">
-                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-secondary px-4">
-                            Cancelar
-                        </a>
+                    <div class="text-center mt-4">
+                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-secondary btn-sm">Cancelar</a>
                     </div>
 
                 </div>
             </div>
-
         </div>
     </div>
 </div>
 
 <style>
-.payment-title {
-    color: #1d3557;
-    letter-spacing: 0.5px;
-}
-
-.divider {
-    width: 80px;
-    height: 4px;
-    background: linear-gradient(90deg, #1d3557, #2a9d8f);
-    border-radius: 10px;
-}
-
-.total-box {
-    background-color: #f8f9fa;
-    border-radius: 16px;
-    padding: 18px 30px;
-    display: inline-block;
-    box-shadow: inset 0 0 0 1px #e0e0e0;
-}
-
-.total-box span {
-    font-size: 0.9rem;
-    color: #6c757d;
-}
-
-.payment-card {
-    width: 100%;
-    border: none;
-    border-radius: 18px;
-    padding: 35px 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-}
-
-.payment-card h5 {
-    margin-top: 12px;
-    font-weight: 700;
-}
-
-.payment-card p {
-    margin-bottom: 0;
-    font-size: 0.9rem;
-    opacity: 0.8;
-}
-
-.payment-card .icon {
-    font-size: 3rem;
-}
-
-.card-tarjeta {
-    background: linear-gradient(135deg, #1d3557, #457b9d);
-    color: #fff;
-}
-
-.card-transferencia {
-    background: linear-gradient(135deg, #2a9d8f, #52b788);
-    color: #fff;
-}
-
-.payment-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
-}
+.payment-title { color: #1d3557; }
+.divider { width: 60px; height: 3px; background: #2a9d8f; margin: 10px auto; }
+.payment-card { border: none; border-radius: 15px; padding: 20px; transition: 0.3s; color: white; cursor: pointer; }
+.payment-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+.card-tarjeta { background: linear-gradient(135deg, #1d3557, #457b9d); }
+.card-transferencia { background: linear-gradient(135deg, #2a9d8f, #52b788); }
+.icon { font-size: 2.5rem; margin-bottom: 10px; }
 </style>
 {% endblock %}

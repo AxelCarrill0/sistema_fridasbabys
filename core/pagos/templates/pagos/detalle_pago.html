@@ -4,122 +4,83 @@
 {% block contenido %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-9 col-md-11">
+        <div class="col-lg-10 col-md-12">
 
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-5">
+            <div class="card shadow border-0 rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-5 text-center">
+                    <h3 class="fw-bold text-primary">Comprobante de Pago</h3>
+                    <p class="text-muted">Frida’s Babys S.A.</p>
+                </div>
 
+                <div class="card-body px-5 pb-5">
 
-                    <div class="text-center mb-4">
-                        <h2 class="fw-bold mb-0 text-primary">Frida’s Babys</h2>
-                        <p class="text-muted mb-1">Comprobante de Pago</p>
-                        <small class="text-muted">
-                            Gracias por tu compra
-                        </small>
-                    </div>
-
-                    <hr class="my-4">
-
-                    <div class="row mb-4">
+                    <div class="row mb-4 border-bottom pb-3">
                         <div class="col-md-6">
-                            <p class="mb-1">
-                                <strong>N.º de Pago:</strong> {{ pago.id }}
-                            </p>
-                            <p class="mb-1">
-                                <strong>Fecha:</strong>
-                                {{ pago.fecha_pago|date:"d/m/Y" }}
-                            </p>
+                            <h6 class="text-uppercase text-muted fw-bold small">Datos del Cliente</h6>
+                            <p class="mb-0 fw-bold">{{ pago.usuario.first_name }} {{ pago.usuario.last_name }}</p>
+                            <p class="mb-0 small text-muted">{{ pago.usuario.email }}</p>
                         </div>
-
                         <div class="col-md-6 text-md-end">
-                            <p class="mb-1">
-                                <strong>Método:</strong>
-                                {{ pago.metodo_pago|capfirst }}
-                            </p>
-                            <p class="mb-1">
-                                <strong>Estado:</strong>
-                                <span class="badge bg-success px-3 py-1">
-                                    Pagado
-                                </span>
-                            </p>
+                            <h6 class="text-uppercase text-muted fw-bold small">Detalles del Pago</h6>
+                            <p class="mb-0"><strong>N°:</strong> #{{ pago.id }}</p>
+                            <p class="mb-0"><strong>Fecha:</strong> {{ pago.fecha_pago|date:"d/m/Y H:i" }}</p>
+                            <span class="badge bg-success">PAGADO CON {{ pago.get_metodo_pago_display|upper }}</span>
                         </div>
                     </div>
 
-                    <div class="border rounded-4 p-4 mb-4 bg-light">
-                        <h6 class="fw-bold mb-3 text-uppercase text-muted">
-                            Datos del Cliente
-                        </h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p class="mb-1">
-                                    <strong>Nombre:</strong> {{ pago.usuario.nombre }}
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Correo:</strong> {{ pago.usuario.email }}
-                                </p>
-                            </div>
-                            <div class="col-md-6">
-                                <p class="mb-1">
-                                    <strong>Teléfono:</strong> {{ pago.usuario.telefono }}
-                                </p>
-                                <p class="mb-1">
-                                    <strong>Dirección:</strong> {{ pago.usuario.direccion }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <h6 class="fw-bold mb-3 text-uppercase text-muted">
-                        Detalle de Productos
-                    </h6>
-
-                    <div class="table-responsive mb-4">
+                    <div class="table-responsive">
                         <table class="table table-hover align-middle">
-                            <thead class="table-light">
-                                <tr class="text-center">
+                            <thead class="table-light small">
+                                <tr class="text-center text-uppercase">
                                     <th class="text-start">Producto</th>
-                                    <th>Cantidad</th>
-                                    <th>Precio Unitario</th>
-                                    <th>Subtotal</th>
+                                    <th>Vendedor</th>
+                                    <th>Cant.</th>
+                                    <th>P. Base</th>
+                                    <th>Desc.</th>
+                                    <th>IVA (15%)</th>
+                                    <th class="text-end">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for pedido in pedidos %}
+                                {% for item in detalles %}
                                 <tr class="text-center">
-                                    <td class="text-start fw-semibold">
-                                        {{ pedido.producto.nombre }}
+                                    <td class="text-start">
+                                        <span class="fw-bold d-block">{{ item.producto.nombre }}</span>
                                     </td>
-                                    <td>{{ pedido.cantidad }}</td>
-                                    <td>
-                                        ${{ pedido.producto.precio_final|floatformat:2 }}
+                                    <td class="small text-muted">
+                                        <i class="fas fa-user-tag"></i> {{ item.vendedor.username }}
                                     </td>
-                                    <td class="fw-bold">
-                                        ${{ pedido.cantidad|mul:pedido.producto.precio_final|floatformat:2 }}
-                                    </td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>${{ item.precio_base_unit|floatformat:2 }}</td>
+                                    <td class="text-danger">-${{ item.monto_desc_unit|floatformat:2 }}</td>
+                                    <td class="text-muted">${{ item.monto_iva_unit|floatformat:2 }}</td>
+                                    <td class="fw-bold text-end">${{ item.precio_final_unit|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
+                            <tfoot class="border-top">
+                                <tr>
+                                    <td colspan="6" class="text-end text-muted">Subtotal (Sin IVA):</td>
+                                    <td class="text-end">${{ subtotal|floatformat:2 }}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="6" class="text-end text-muted">Total IVA (15%):</td>
+                                    <td class="text-end">${{ total_iva|floatformat:2 }}</td>
+                                </tr>
+                                <tr class="bg-light">
+                                    <td colspan="6" class="text-end fw-bold fs-5">TOTAL PAGADO:</td>
+                                    <td class="text-end fw-bold fs-5 text-success">${{ pago.total|floatformat:2 }}</td>
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-end mb-4">
-                        <div class="total-box">
-                            <span class="text-muted">Total pagado</span>
-                            <h3 class="fw-bold mb-0 text-success">
-                                ${{ pago.total|floatformat:2 }}
-                            </h3>
-                        </div>
-                    </div>
-
-                    <div class="text-center mt-4">
-                        <a href="{% url 'pagos:descargar_comprobante' pago.id %}"
-                           class="btn btn-outline-primary px-4 me-2">
-                             Descargar comprobante
+                    <div class="text-center mt-5 d-flex justify-content-center gap-3">
+                        <a href="{% url 'pagos:descargar_comprobante' pago.id %}" class="btn btn-primary px-4 rounded-pill">
+                             <i class="fas fa-file-pdf me-2"></i> Descargar PDF Oficial
                         </a>
-
-                        <a href="{% url 'pedidos:lista_pedidos' %}"
-                           class="btn btn-secondary px-4">
-                            Volver a pedidos
+                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-secondary px-4 rounded-pill">
+                            Volver al Inicio
                         </a>
                     </div>
 
@@ -129,14 +90,4 @@
         </div>
     </div>
 </div>
-
-<style>
-.total-box {
-    background: #f8f9fa;
-    border-radius: 18px;
-    padding: 20px 32px;
-    text-align: right;
-    box-shadow: inset 0 0 0 1px #e0e0e0;
-}
-</style>
 {% endblock %}
