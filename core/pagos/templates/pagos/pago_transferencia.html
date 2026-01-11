@@ -1,4 +1,5 @@
 {% extends "home/base_cliente.html" %}
+{% load static %}
 
 {% block contenido %}
 <div class="container my-5">
@@ -28,10 +29,11 @@
                         </span>
                     </div>
 
+                    <!-- QR REAL (IMAGEN LOCAL) -->
                     <div class="qr-wrapper mb-4">
                         <img
-                            src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TRANSFERENCIA_FICTICIA"
-                            alt="QR de transferencia"
+                            src="{% static 'img/qr_bancario.png' %}"
+                            alt="QR de transferencia bancaria"
                             class="img-fluid"
                         >
                     </div>
