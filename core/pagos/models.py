@@ -11,6 +11,7 @@ class Pago(models.Model):
     Representa un pago realizado por un usuario, incluyendo
     método de pago, estado y fechas de creación y pago.
     """
+
     METODO_PAGO_CHOICES = (
         ('tarjeta', 'Tarjeta de crédito'),
         ('transferencia', 'Transferencia'),
@@ -27,36 +28,53 @@ class Pago(models.Model):
         related_name='pagos',
         verbose_name="Usuario"
     )
+
     total = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         verbose_name="Total"
     )
+
     metodo_pago = models.CharField(
         max_length=20,
         choices=METODO_PAGO_CHOICES,
         verbose_name="Método de pago"
     )
+
     estado = models.CharField(
         max_length=20,
         choices=ESTADO_CHOICES,
         default='pendiente',
         verbose_name="Estado"
     )
+
     fecha_creacion = models.DateTimeField(
         auto_now_add=True,
         verbose_name="Fecha de creación"
     )
+
     fecha_pago = models.DateTimeField(
         null=True,
         blank=True,
         verbose_name="Fecha de pago"
     )
+
+    # 🔹 Imagen de verificación
+    # - Tarjeta → captura facial
+    # - Transferencia → comprobante bancario
     foto_verificacion = models.ImageField(
-        upload_to='verificaciones/',
+        upload_to='verificacion_comprobante/',
         null=True,
         blank=True,
-        verbose_name="Foto de Verificación"
+        verbose_name="Imagen de verificación / comprobante"
+    )
+
+    # 🔹 Solo para transferencia bancaria
+    codigo_comprobante = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name="Código de comprobante bancario"
     )
 
     def __str__(self):

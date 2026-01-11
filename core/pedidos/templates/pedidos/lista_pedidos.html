@@ -4,79 +4,106 @@
 
 {% block contenido %}
 <div class="container my-5">
-    <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-            <h2 class="text-center mb-4"> Mis Pedidos</h2>
+    <div class="card shadow-lg border-0 rounded-4 main-card">
+        <div class="card-body p-5">
+
+            <h2 class="text-center fw-bold mb-2 title-main">Mis Pedidos</h2>
+            <p class="text-center subtitle mb-5">Resumen de tus compras y pedidos</p>
 
             {% if pendientes %}
-                <h3>Pedidos Pendientes</h3>
+                <h4 class="section-title mb-4">Pedidos Pendientes</h4>
+
                 <div class="row g-4">
                     {% for detalle in pendientes %}
                     <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4">
-                            <div class="card-body">
-                                <h5 class="card-title text-center mb-3">Pedido #{{ detalle.pedido.id }}</h5>
-                                <p><strong>Producto:</strong> {{ detalle.pedido.producto.nombre }}</p>
-                                <p><strong>Cantidad:</strong> {{ detalle.pedido.cantidad }}</p>
-                                <p><strong>Precio unitario:</strong> ${{ detalle.precio_final|floatformat:2 }}</p>
-                                <p><strong>Subtotal:</strong> ${{ detalle.subtotal|floatformat:2 }}</p>
-                                <p><strong>Fecha:</strong> {{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                        <div class="card pedido-card pendiente h-100 border-0">
+                            <div class="card-body d-flex flex-column">
 
-                                <div class="d-flex justify-content-between mt-3">
-                                    <a href="{% url 'pedidos:editar_pedido' detalle.pedido.id %}" class="btn btn-sm btn-info">✏️ Editar</a>
-                                    <a href="{% url 'pedidos:cancelar_pedido' detalle.pedido.id %}" class="btn btn-sm btn-danger">🗑 Cancelar</a>
+                                <div class="pedido-header mb-3">
+                                    <span class="pedido-id">Pedido #{{ detalle.pedido.id }}</span>
                                 </div>
+
+                                <div class="pedido-info">
+                                    <p><span>Producto</span>{{ detalle.pedido.producto.nombre }}</p>
+                                    <p><span>Cantidad</span>{{ detalle.pedido.cantidad }}</p>
+                                    <p><span>Precio</span>${{ detalle.precio_final|floatformat:2 }}</p>
+                                    <p><span>Subtotal</span>${{ detalle.subtotal|floatformat:2 }}</p>
+                                    <p><span>Fecha</span>{{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                                </div>
+
+                                <div class="mt-auto d-flex gap-2 pt-3">
+                                    <a href="{% url 'pedidos:editar_pedido' detalle.pedido.id %}" class="btn btn-outline-primary w-100">
+                                        Editar
+                                    </a>
+                                    <a href="{% url 'pedidos:cancelar_pedido' detalle.pedido.id %}" class="btn btn-outline-danger w-100">
+                                        Cancelar
+                                    </a>
+                                </div>
+
                             </div>
                         </div>
                     </div>
                     {% endfor %}
-
-                    <div class="col-12 mt-4 text-end">
-                        <h4>Total Pendientes: ${{ total_pendientes|floatformat:2 }}</h4>
-                        <button class="btn btn-success mt-3" data-bs-toggle="modal" data-bs-target="#confirmarCompraModal">
-                            🛒 Confirmar Compra
-                        </button>
-                    </div>
                 </div>
 
-                <div class="modal fade" id="confirmarCompraModal" tabindex="-1" aria-labelledby="confirmarCompraModalLabel" aria-hidden="true">
+                <div class="total-box mt-5">
+                    <div class="total-text">
+                        Total Pendiente
+                        <strong>${{ total_pendientes|floatformat:2 }}</strong>
+                    </div>
+                    <button class="btn btn-confirm" data-bs-toggle="modal" data-bs-target="#confirmarCompraModal">
+                        Confirmar Compra
+                    </button>
+                </div>
+
+                <div class="modal fade" id="confirmarCompraModal" tabindex="-1">
                     <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                        <div class="modal-content modal-custom border-0 rounded-4">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="confirmarCompraModalLabel">Confirmar Compra</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                                <h5 class="modal-title fw-bold">Confirmar compra</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <div class="modal-body">
-                                ¿Estás seguro de que deseas confirmar la compra por un total de <strong>${{ total_pendientes|floatformat:2 }}</strong>?
+                            <div class="modal-body text-center fs-5">
+                                Confirmar compra por un total de
+                                <strong>${{ total_pendientes|floatformat:2 }}</strong>
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
                                 <form method="post" action="{% url 'pedidos:confirmar_compra' %}">
                                     {% csrf_token %}
-                                    <button type="submit" class="btn btn-success">Sí, Confirmar</button>
+                                    <button type="submit" class="btn btn-confirm">Confirmar</button>
                                 </form>
                             </div>
                         </div>
                     </div>
                 </div>
+
             {% else %}
-                <p>No tienes pedidos pendientes.</p>
+                <p class="text-center text-muted fs-5">No tienes pedidos pendientes.</p>
             {% endif %}
 
             {% if enviados %}
-                <h3 class="mt-5">Pedidos Enviados / Confirmados</h3>
+                <h4 class="section-title mt-5 mb-4">Pedidos Confirmados</h4>
+
                 <div class="row g-4">
                     {% for detalle in enviados %}
                     <div class="col-md-6 col-lg-4">
-                        <div class="card h-100 border-0 shadow-sm rounded-4">
+                        <div class="card pedido-card enviado h-100 border-0">
                             <div class="card-body">
-                                <h5 class="card-title text-center mb-3">Pedido #{{ detalle.pedido.id }}</h5>
-                                <p><strong>Producto:</strong> {{ detalle.pedido.producto.nombre }}</p>
-                                <p><strong>Cantidad:</strong> {{ detalle.pedido.cantidad }}</p>
-                                <p><strong>Precio unitario:</strong> ${{ detalle.precio_final|floatformat:2 }}</p>
-                                <p><strong>Subtotal:</strong> ${{ detalle.subtotal|floatformat:2 }}</p>
-                                <p><strong>Fecha:</strong> {{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
-                                <p><strong>Estado:</strong> {{ detalle.pedido.get_estado_display }}</p>
+
+                                <div class="pedido-header enviado mb-3">
+                                    <span class="pedido-id">Pedido #{{ detalle.pedido.id }}</span>
+                                </div>
+
+                                <div class="pedido-info">
+                                    <p><span>Producto</span>{{ detalle.pedido.producto.nombre }}</p>
+                                    <p><span>Cantidad</span>{{ detalle.pedido.cantidad }}</p>
+                                    <p><span>Precio</span>${{ detalle.precio_final|floatformat:2 }}</p>
+                                    <p><span>Subtotal</span>${{ detalle.subtotal|floatformat:2 }}</p>
+                                    <p><span>Fecha</span>{{ detalle.pedido.fecha_pedido|date:"d/m/Y" }}</p>
+                                    <p><span>Estado</span>{{ detalle.pedido.get_estado_display }}</p>
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -84,11 +111,90 @@
                 </div>
             {% endif %}
 
-            <div class="mt-4 text-center">
-                <a href="{% url 'productos:catalogo' %}" class="btn btn-dark">Seguir Comprando</a>
+            <div class="mt-5 text-center">
+                <a href="{% url 'productos:catalogo' %}" class="btn btn-outline-dark px-4">
+                    Seguir comprando
+                </a>
             </div>
 
         </div>
     </div>
 </div>
+
+<style>
+.title-main {
+    font-size: 2.2rem;
+    letter-spacing: 0.5px;
+}
+.subtitle {
+    color: #6c757d;
+    font-size: 1rem;
+}
+.section-title {
+    font-weight: 700;
+    color: #1d3557;
+}
+.pedido-card {
+    border-radius: 18px;
+    transition: all .3s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,.06);
+}
+.pedido-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 16px 35px rgba(0,0,0,.12);
+}
+.pedido-header {
+    text-align: center;
+}
+.pedido-id {
+    background: #1d3557;
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: .85rem;
+    font-weight: 600;
+}
+.pedido-header.enviado .pedido-id {
+    background: #2a9d8f;
+}
+.pedido-info p {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: .4rem;
+    font-size: .95rem;
+}
+.pedido-info span {
+    font-weight: 600;
+    color: #555;
+}
+.total-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f8f9fa;
+    padding: 20px 30px;
+    border-radius: 16px;
+}
+.total-text {
+    font-size: 1.2rem;
+}
+.total-text strong {
+    display: block;
+    font-size: 1.6rem;
+    color: #1d3557;
+}
+.btn-confirm {
+    background: #1d3557;
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+}
+.btn-confirm:hover {
+    background: #16324a;
+    color: #fff;
+}
+.modal-custom {
+    padding: 10px;
+}
+</style>
 {% endblock %}

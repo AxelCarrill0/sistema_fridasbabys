@@ -2,9 +2,9 @@
 {% block titulo %}Registro de Cliente{% endblock %}
 
 {% block contenido %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
-    <div class="card shadow p-4" style="max-width: 420px; width: 100%; border-radius: 16px; background-color: #ffffff;">
-        <h2 class="card-title text-center mb-4 fw-bold" style="color:#4a4e69;">
+<div class="d-flex justify-content-center align-items-center registro-wrapper">
+    <div class="card registro-card shadow-lg">
+        <h2 class="card-title text-center mb-4 registro-title">
             Crear Cuenta de Cliente
         </h2>
 
@@ -12,7 +12,9 @@
             {% csrf_token %}
             {% for field in form %}
                 <div class="mb-3">
-                    <label for="{{ field.id_for_label }}" class="form-label" style="color:#4a4e69;">{{ field.label }}</label>
+                    <label for="{{ field.id_for_label }}" class="form-label registro-label">
+                        {{ field.label }}
+                    </label>
                     {{ field }}
                     {% if field.errors %}
                         {% for error in field.errors %}
@@ -22,15 +24,13 @@
                 </div>
             {% endfor %}
 
-            <button type="submit"
-                class="btn w-100 mt-3"
-                style="background-color:#5d677a; border-color:#5d677a; color:white;">
+            <button type="submit" class="btn btn-registro w-100 mt-3">
                 Registrarme
             </button>
         </form>
 
         <div class="text-center mt-3">
-            <a href="{% url 'login' %}" style="color:#4a4e69; text-decoration:none;">
+            <a href="{% url 'login' %}" class="login-link">
                 ← Ya tengo cuenta (Iniciar Sesión)
             </a>
         </div>
@@ -38,25 +38,82 @@
 </div>
 
 <style>
-    body {
-        background-color: #a8dadc;
-    }
+/* Fondo general */
+body {
+    background: linear-gradient(135deg, #a8dadc, #f1faee);
+}
 
-    nav.navbar {
-        background-color: #2f3d44 !important;
-    }
+/* Card principal */
+.registro-card {
+    max-width: 420px;
+    width: 100%;
+    padding: 2rem;
+    border-radius: 18px;
+    border: none;
+    background-color: #ffffff;
+}
 
-    .navbar-brand, .navbar-nav .nav-link {
-        color: #ffffff !important;
-    }
+/* Título */
+.registro-title {
+    font-weight: 700;
+    color: #4a4e69;
+    letter-spacing: 0.5px;
+}
 
-    .btn:hover {
-        background-color: #4a4e69 !important;
-        border-color: #4a4e69 !important;
-    }
+/* Labels */
+.registro-label {
+    font-weight: 600;
+    color: #4a4e69;
+}
 
-    .form-control {
-        border-radius: 6px;
-    }
+/* Inputs */
+.form-control {
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.form-control:focus {
+    border-color: #5d677a;
+    box-shadow: 0 0 0 0.15rem rgba(93, 103, 122, 0.25);
+}
+
+/* Botón */
+.btn-registro {
+    background-color: #5d677a;
+    border-color: #5d677a;
+    color: white;
+    font-weight: 600;
+    border-radius: 25px;
+    padding: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-registro:hover {
+    background-color: #4a4e69;
+    border-color: #4a4e69;
+    transform: translateY(-1px);
+}
+
+/* Link login */
+.login-link {
+    color: #4a4e69;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.login-link:hover {
+    text-decoration: underline;
+}
+
+/* Navbar (coherente con el resto) */
+nav.navbar {
+    background-color: #2f3d44 !important;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+    color: #ffffff !important;
+}
 </style>
 {% endblock %}

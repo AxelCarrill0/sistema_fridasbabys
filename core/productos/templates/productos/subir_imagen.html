@@ -2,32 +2,53 @@
 {% block titulo %}Subir Imagen{% endblock %}
 
 {% block contenido %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-header bg-secondary text-white text-center py-3">
-                    <h4 class="fw-bold mb-0">Agregar Imagen a: {{ producto.nombre }}</h4>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="card shadow-lg border-0 rounded-4" style="max-width: 520px; width: 100%;">
+        <div class="card-header text-center py-4" style="background-color:#1d3557; color:white; border-radius:16px 16px 0 0;">
+            <h4 class="fw-bold mb-1">Subir Imagen</h4>
+            <p class="mb-0 small">Producto: {{ producto.nombre }}</p>
+        </div>
+
+        <div class="card-body p-4" style="background-color:#f8f9fa;">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold" style="color:#1d3557;">
+                        Selecciona una imagen
+                    </label>
+                    <input type="file" name="imagen" accept="image/*" class="form-control form-control-lg" required>
                 </div>
-                <div class="card-body bg-light p-4">
-                    <form method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label class="form-label fw-semibold">Selecciona una imagen:</label>
-                            <input type="file" name="imagen" accept="image/*" class="form-control" required>
-                        </div>
-                        <div class="text-center mt-4">
-                            <button type="submit" class="btn btn-primary me-2">
-                                <i class="fas fa-upload"></i> Subir Imagen
-                            </button>
-                            <a href="{% url 'productos:detalle' producto.id %}" class="btn btn-secondary">
-                                <i class="fas fa-arrow-left"></i> Volver
-                            </a>
-                        </div>
-                    </form>
+
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'productos:detalle' producto.id %}"
+                       class="btn px-4"
+                       style="background-color:#6c757d; color:white;">
+                        Volver
+                    </a>
+
+                    <button type="submit"
+                        class="btn px-4"
+                        style="background-color:#1d3557; color:white;">
+                        Subir Imagen
+                    </button>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>
+
+<style>
+body {
+    background-color: #a8dadc;
+}
+
+.form-control {
+    border-radius: 10px;
+}
+
+.btn:hover {
+    opacity: 0.9;
+}
+</style>
 {% endblock %}

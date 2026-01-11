@@ -7,31 +7,45 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-10">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center">
-                    <h2 class="mb-0">{{ producto.nombre }}</h2>
+            <div class="card shadow-lg border-0 card-producto">
+
+                <!-- HEADER -->
+                <div class="card-header text-center py-4 header-producto">
+                    <h2 class="mb-1 fw-semibold">{{ producto.nombre }}</h2>
+                    <small class="opacity-75">Detalle del producto</small>
                 </div>
 
                 <div class="card-body p-5">
-                    <div class="row">
+                    <div class="row align-items-center">
+
+                        <!-- IMAGEN + COMPRA -->
                         <div class="col-md-5 text-center mb-4 d-flex flex-column align-items-center">
+
                             {% if producto.imagen %}
-                                <img src="{{ producto.imagen.url }}" class="img-fluid rounded shadow-sm mb-4" alt="{{ producto.nombre }}">
+                                <div class="img-wrapper mb-4">
+                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                                </div>
                             {% else %}
-                                <i class="fas fa-box fa-10x text-muted border p-4 rounded mb-4"></i>
-                                <p class="text-muted">Imagen no disponible</p>
+                                <div class="img-wrapper mb-4 d-flex flex-column justify-content-center align-items-center">
+                                    <i class="fas fa-box fa-5x text-muted mb-2"></i>
+                                    <p class="text-muted">Imagen no disponible</p>
+                                </div>
                             {% endif %}
 
                             {% if user.is_authenticated %}
-                                <form method="post" action="{% url 'pedidos:agregar_a_pedido' %}" class="d-flex align-items-center justify-content-center gap-3">
+                                <form method="post" action="{% url 'pedidos:agregar_a_pedido' %}" class="d-flex align-items-end gap-3">
                                     {% csrf_token %}
                                     <input type="hidden" name="producto_id" value="{{ producto.id }}">
+
                                     <div>
-                                        <label for="cantidad" class="form-label mb-1"><strong>Cantidad:</strong></label>
-                                        <input type="number" name="cantidad" id="cantidad" value="1" min="1" max="{{ producto.stock }}" class="form-control text-center" style="width: 100px;">
+                                        <label for="cantidad" class="form-label mb-1 fw-semibold">Cantidad</label>
+                                        <input type="number" name="cantidad" id="cantidad"
+                                               value="1" min="1" max="{{ producto.stock }}"
+                                               class="form-control text-center input-cantidad">
                                     </div>
-                                    <button type="submit" class="btn btn-success btn-lg">
-                                        <i class="fas fa-shopping-cart"></i> Añadir
+
+                                    <button type="submit" class="btn btn-add btn-lg">
+                                        <i class="fas fa-shopping-cart me-1"></i> Añadir
                                     </button>
                                 </form>
                             {% else %}
@@ -39,37 +53,59 @@
                             {% endif %}
                         </div>
 
+                        <!-- INFO -->
                         <div class="col-md-7">
-                            <h4 class="mb-3">Información General</h4>
-                            <p class="lead">{{ producto.descripcion|default:"No hay descripción disponible." }}</p>
-                            <hr>
-                            <div class="price-section mb-4">
-                                <h5 class="text-muted mb-2">Precio:</h5>
-                                <h3 class="base-price text-decoration-line-through text-secondary">${{ producto.precio_final }}</h3>
+                            <h4 class="fw-semibold mb-3">Información General</h4>
+                            <p class="lead text-muted">
+                                {{ producto.descripcion|default:"No hay descripción disponible." }}
+                            </p>
 
-                                <h5 class="text-success mb-2">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h5>
-                                <h1 class="display-5 text-success fw-bold">
+                            <hr>
+
+                            <!-- PRECIO -->
+                            <div class="price-section mb-4">
+                                <small class="text-muted">Precio original</small>
+                                <div class="base-price text-decoration-line-through text-secondary">
+                                    ${{ producto.precio_final }}
+                                </div>
+
+                                <small class="text-success mt-3 d-block">
+                                    Precio promocional ({{ descuento_aplicado }}% Dcto)
+                                </small>
+                                <h1 class="fw-bold text-success">
                                     ${{ precio_promocional }}
                                 </h1>
-                                <span class="badge bg-warning text-dark">
-                                    ¡Ahorras ${{ ahorro|floatformat:2 }}!
+
+                                <span class="badge bg-warning text-dark mt-2">
+                                    Ahorras ${{ ahorro|floatformat:2 }}
                                 </span>
                             </div>
+
                             <hr>
-                            <div class="details-grid mb-4">
-                                <div><strong>Stock:</strong>
-                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">{{ producto.stock }} unidades</span>
+
+                            <!-- DETALLES -->
+                            <div class="details-grid">
+                                <div>
+                                    <strong>Stock:</strong>
+                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">
+                                        {{ producto.stock }} unidades
+                                    </span>
                                 </div>
-                                <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
+                                <div>
+                                    <strong>Categoría:</strong>
+                                    {{ producto.get_categoria_display }}
+                                </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- VOLVER -->
                     <div class="mt-5 text-center">
-                        <a href="{% url 'productos:catalogo' %}" class="btn btn-secondary btn-lg">
-                            <i class="fas fa-arrow-left"></i> Volver al Catálogo
+                        <a href="{% url 'productos:catalogo' %}" class="btn btn-outline-custom btn-lg">
+                            <i class="fas fa-arrow-left me-1"></i> Volver al Catálogo
                         </a>
                     </div>
+
                 </div>
             </div>
         </div>
@@ -77,8 +113,79 @@
 </div>
 
 <style>
-.card-header.bg-primary { background-color: #5d677a !important; }
-.base-price { font-size: 1.3rem; }
-.details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+body {
+    font-family: 'Poppins', 'Segoe UI', sans-serif;
+}
+
+.card-producto {
+    border-radius: 18px;
+    overflow: hidden;
+}
+
+.header-producto {
+    background-color: #5d677a;
+    color: white;
+}
+
+.img-wrapper {
+    background: #f8f9fa;
+    padding: 22px;
+    border-radius: 18px;
+    box-shadow: 0 10px 25px rgba(0,0,0,.08);
+}
+
+.img-wrapper img {
+    max-height: 320px;
+    object-fit: contain;
+    transition: transform .3s ease;
+}
+
+.img-wrapper img:hover {
+    transform: scale(1.05);
+}
+
+.input-cantidad {
+    width: 90px;
+    border-radius: 10px;
+}
+
+.btn-add {
+    background-color: #5d677a;
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    transition: all .3s ease;
+}
+
+.btn-add:hover {
+    background-color: #4b5566;
+    transform: translateY(-2px);
+}
+
+.btn-outline-custom {
+    border: 2px solid #5d677a;
+    color: #5d677a;
+    border-radius: 12px;
+    padding: 12px 30px;
+    transition: all .3s ease;
+}
+
+.btn-outline-custom:hover {
+    background-color: #5d677a;
+    color: white;
+}
+
+.base-price {
+    font-size: 1.2rem;
+}
+
+
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+}
 </style>
 {% endblock %}

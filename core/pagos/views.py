@@ -17,6 +17,7 @@ import os
 import base64
 from django.core.files.base import ContentFile
 
+
 @login_required
 def seleccionar_metodo(request, pago_id):
     """
@@ -41,7 +42,7 @@ def procesar_pago(request, pago_id):
 
     if request.method == 'POST':
 
-        # 🔹 PAGO CON TARJETA
+        # 🔹 PAGO CON TARJETA (NO SE TOCA)
         if pago.metodo_pago == 'tarjeta':
             rostro_b64 = request.POST.get('rostro_verificacion')
 
@@ -64,8 +65,25 @@ def procesar_pago(request, pago_id):
             else:
                 messages.error(request, "Debe capturar su rostro para continuar.")
 
-        # 🔹 PAGO POR TRANSFERENCIA
+        # 🔹 PAGO POR TRANSFERENCIA (AQUÍ ESTÁ LO NUEVO)
         elif pago.metodo_pago == 'transferencia':
+
+            codigo = request.POST.get('codigo_comprobante')
+            imagen = request.FILES.get('foto_verificacion')
+
+            if not codigo:
+                messages.error(request, "Debe ingresar el código del comprobante.")
+                return redirect('pagos:procesar_pago', pago_id=pago.id)
+
+            if not imagen:
+                messages.error(request, "Debe subir la imagen del comprobante.")
+                return redirect('pagos:procesar_pago', pago_id=pago.id)
+
+            # Guardar datos de verificación
+            pago.codigo_comprobante = codigo
+            pago.foto_verificacion = imagen
+            pago.save()
+
             finalizar_pago(pago)
             messages.success(request, "Pago por transferencia confirmado.")
             return redirect('pagos:detalle_pago', pago_id=pago.id)
@@ -132,14 +150,9 @@ def descargar_comprobante(request, pago_id):
     )
 
     styles = getSampleStyleSheet()
-    titulo = ParagraphStyle(
-        'titulo',
-        parent=styles['Heading2'],
-        alignment=1
-    )
-
     elementos = []
 
+    # 🔹 LOGO Y ENCABEZADO
     logo_path = os.path.join(settings.BASE_DIR, 'static/img/logo.png')
     logo = Image(logo_path, width=80, height=80)
 
@@ -147,8 +160,7 @@ def descargar_comprobante(request, pago_id):
         [
             logo,
             Paragraph(
-                "<b>Frida’s Babys</b><br/>"
-                "Recibo de Pago",
+                "<b>Frida’s Babys</b><br/>Recibo de Pago",
                 styles['Title']
             )
         ]
@@ -163,6 +175,7 @@ def descargar_comprobante(request, pago_id):
     elementos.append(encabezado)
     elementos.append(Spacer(1, 15))
 
+    # 🔹 INFORMACIÓN DEL PAGO
     info_pago = Table([
         ["N° de Pago", pago.id],
         ["Fecha", pago.fecha_pago.strftime('%d/%m/%Y')],
@@ -171,7 +184,6 @@ def descargar_comprobante(request, pago_id):
 
     info_pago.setStyle(TableStyle([
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
         ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('PADDING', (0, 0), (-1, -1), 6),
     ]))
@@ -179,26 +191,23 @@ def descargar_comprobante(request, pago_id):
     elementos.append(info_pago)
     elementos.append(Spacer(1, 15))
 
-    cliente = Table([
-        ["Datos del Cliente", ""],
-        ["Nombre", usuario.nombre],
-        ["Correo", usuario.email],
-        ["Teléfono", usuario.telefono],
-        ["Dirección", usuario.direccion],
-    ], colWidths=[150, 330])
+    # 🔹 CÓDIGO DE COMPROBANTE (SOLO TRANSFERENCIA)
+    if pago.metodo_pago == 'transferencia' and pago.codigo_comprobante:
+        comprobante_tabla = Table([
+            ["Código del comprobante", pago.codigo_comprobante]
+        ], colWidths=[150, 330])
 
+        comprobante_tabla.setStyle(TableStyle([
+            ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+            ('BACKGROUND', (0, 0), (0, 0), colors.whitesmoke),
+            ('FONT', (0, 0), (0, 0), 'Helvetica-Bold'),
+            ('PADDING', (0, 0), (-1, -1), 6),
+        ]))
 
-    cliente.setStyle(TableStyle([
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('SPAN', (0, 0), (-1, 0)),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
-        ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('PADDING', (0, 0), (-1, -1), 6),
-    ]))
+        elementos.append(comprobante_tabla)
+        elementos.append(Spacer(1, 15))
 
-    elementos.append(cliente)
-    elementos.append(Spacer(1, 15))
-
+    # 🔹 DETALLE DE PRODUCTOS
     data = [["Producto", "Cantidad", "Precio Unit.", "Subtotal"]]
     total = 0
 
@@ -215,7 +224,6 @@ def descargar_comprobante(request, pago_id):
     tabla_productos = Table(data, colWidths=[200, 80, 100, 100])
     tabla_productos.setStyle(TableStyle([
         ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
-        ('BACKGROUND', (0, 0), (-1, 0), colors.whitesmoke),
         ('FONT', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('ALIGN', (1, 1), (-1, -1), 'CENTER'),
         ('PADDING', (0, 0), (-1, -1), 6),
@@ -224,27 +232,20 @@ def descargar_comprobante(request, pago_id):
     elementos.append(tabla_productos)
     elementos.append(Spacer(1, 15))
 
+    # 🔹 TOTAL
     total_tabla = Table([
         ["TOTAL PAGADO", f"${total:.2f}"]
     ], colWidths=[380, 100])
 
     total_tabla.setStyle(TableStyle([
         ('GRID', (0, 0), (-1, -1), 1, colors.black),
-        ('BACKGROUND', (0, 0), (-1, -1), colors.whitesmoke),
         ('FONT', (0, 0), (-1, -1), 'Helvetica-Bold'),
         ('ALIGN', (1, 0), (1, 0), 'RIGHT'),
         ('PADDING', (0, 0), (-1, -1), 10),
     ]))
 
     elementos.append(total_tabla)
-    elementos.append(Spacer(1, 20))
-
-    elementos.append(
-        Paragraph(
-            "Gracias por su compra.<br/>",
-            styles['Normal']
-        )
-    )
 
     doc.build(elementos)
     return response
+

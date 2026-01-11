@@ -1,46 +1,60 @@
-{% extends "home/base.html" %} 
+{% extends "home/base.html" %}
 {% block titulo %}Lista de Usuarios{% endblock %}
 
 {% block contenido %}
-    <div class="container mt-4">
-        <h1 class="page-title">Usuarios</h1>
+<div class="container mt-4">
 
-        <div class="mb-3 d-flex justify-content-end">
-            <a href="{% url 'usuarios:crear' %}" class="btn create-button">
-                <i class="fas fa-user-plus"></i> Crear Nuevo Usuario
-            </a>
-        </div>
-    {% for message in messages %}
-            {% if "usuario" in message.message|lower %}
-                <div class="alert alert-{{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endif %}
-        {% endfor %}
+    <div class="users-header mb-4">
+        <h1 class="users-title">
+            <span class="icon-circle">
+                <i class="fa-solid fa-users"></i>
+            </span>
+            Usuarios
+        </h1>
 
+        <a href="{% url 'usuarios:crear' %}" class="btn btn-create">
+            <i class="fa-solid fa-user-plus"></i> Crear nuevo usuario
+        </a>
+    </div>
+
+    <div class="card users-card">
         <div class="table-responsive">
-            <table class="table table-striped table-hover user-table">
-                <thead class="table-dark-custom">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
                     <tr>
                         <th>Usuario</th>
                         <th>Nombre</th>
                         <th>Email</th>
                         <th>Teléfono</th>
                         <th>Rol</th>
-                        <th>Acciones</th>
+                        <th class="text-center">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for u in usuarios %}
                     <tr>
-                        <td>{{ u.username }}</td>
+                        <td class="fw-semibold">{{ u.username }}</td>
                         <td>{{ u.nombre }}</td>
                         <td>{{ u.email }}</td>
-                        <td>{{ u.telefono }}</td>
-                        <td>{{ u.rol }}</td>
+                        <td>{{ u.telefono|default:"—" }}</td>
                         <td>
-                            <a href="{% url 'usuarios:editar' u.id %}" class="btn btn-sm action-link edit-link">Editar</a>
-                            <a href="{% url 'usuarios:eliminar' u.id %}" class="btn btn-sm action-link delete-link">Eliminar</a>
+                            {% if u.rol == "admin" %}
+                                <span class="badge role-admin">
+                                    <i class="fa-solid fa-shield-halved"></i> Admin
+                                </span>
+                            {% else %}
+                                <span class="badge role-client">
+                                    <i class="fa-solid fa-user"></i> Cliente
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'usuarios:editar' u.id %}" class="btn action-btn edit-btn">
+                                <i class="fa-solid fa-pen"></i>
+                            </a>
+                            <a href="{% url 'usuarios:eliminar' u.id %}" class="btn action-btn delete-btn">
+                                <i class="fa-solid fa-trash"></i>
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -49,66 +63,131 @@
         </div>
     </div>
 
-    <style>
-        .page-title {
-            color: #4a4e69;
-            margin-bottom: 20px;
-            font-weight: bold;
-            text-align: center;
-        }
+</div>
 
-        .create-button {
-            background-color: #5d677a;
-            border-color: #5d677a;
-            color: white;
-            transition: background-color 0.3s;
-        }
+<style>
+.users-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
 
-        .create-button:hover {
-            background-color: #4a4e69;
-            border-color: #4a4e69;
-            color: white;
-        }
+.users-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #2f3e46;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
 
-        .table-dark-custom {
-            background-color: #4a4e69;
-            color: white;
-        }
+.icon-circle {
+    width: 44px;
+    height: 44px;
+    background-color: #b7e4e0;
+    color: #2f3e46;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+}
 
-        .user-table {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            background-color: white;
-            border-radius: 8px;
-            overflow: hidden;
-        }
+.btn-create {
+    background-color: #2f3e46;
+    color: #ffffff;
+    border-radius: 25px;
+    padding: 10px 18px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
 
-        .action-link {
-            padding: 2px 8px;
-            margin: 0 2px;
-            border-radius: 4px;
-            text-decoration: none;
-            font-size: 0.85rem;
-            border: 1px solid transparent;
-        }
+.btn-create:hover {
+    background-color: #354f52;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(47,62,70,0.35);
+    color: #ffffff;
+}
 
-        .edit-link {
-            color: #4a4e69;
-            border-color: #4a4e69;
-        }
+.users-card {
+    border-radius: 22px;
+    border: none;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+    overflow: hidden;
+}
 
-        .edit-link:hover {
-            background-color: #4a4e69;
-            color: white;
-        }
+table thead {
+    background-color: #2f3e46;
+    color: #ffffff;
+}
 
-        .delete-link {
-            color: #dc3545;
-            border-color: #dc3545;
-        }
+table thead th {
+    font-weight: 600;
+    border: none;
+    padding: 14px;
+}
 
-        .delete-link:hover {
-            background-color: #dc3545;
-            color: white;
-        }
-    </style>
+table tbody td {
+    padding: 14px;
+    color: #2f3e46;
+}
+
+table tbody tr {
+    transition: background-color 0.25s ease;
+}
+
+table tbody tr:hover {
+    background-color: #f1f5f9;
+}
+
+.badge {
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.role-admin {
+    background-color: #e0e7ff;
+    color: #3730a3;
+}
+
+.role-client {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.action-btn {
+    border-radius: 50%;
+    padding: 6px 10px;
+    margin: 0 3px;
+    transition: all 0.25s ease;
+}
+
+.edit-btn {
+    border: 1px solid #2f3e46;
+    color: #2f3e46;
+}
+
+.edit-btn:hover {
+    background-color: #2f3e46;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+
+.delete-btn {
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.delete-btn:hover {
+    background-color: #dc3545;
+    color: #ffffff;
+    transform: scale(1.1);
+}
+</style>
 {% endblock %}

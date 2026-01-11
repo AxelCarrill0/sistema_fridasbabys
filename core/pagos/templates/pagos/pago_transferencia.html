@@ -3,46 +3,81 @@
 {% block contenido %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
+        <div class="col-lg-6 col-md-8">
 
-            <div class="card shadow-lg border-0 rounded-4">
-                <div class="card-body p-5 text-center">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
 
-                    <h3 class="fw-bold mb-2">
+                <div class="p-4 text-center bg-light">
+                    <div class="fs-1 mb-2">🏦</div>
+                    <h3 class="fw-bold mb-1">
                         Transferencia Bancaria
                     </h3>
-                    <p class="text-muted mb-4">
-                        Escanea el código QR para realizar el pago
+                    <p class="text-muted mb-0">
+                        Completa el pago escaneando el QR
                     </p>
+                </div>
 
-                    <div class="mb-4">
-                        <span class="badge bg-light text-dark fs-6 px-4 py-2">
-                            Total a pagar:
-                            <strong class="ms-1">
-                                ${{ pago.total|floatformat:2 }}
-                            </strong>
+                <div class="card-body p-5">
+
+                    <div class="total-box text-center mb-4">
+                        <span class="text-muted d-block mb-1">
+                            Total a pagar
+                        </span>
+                        <span class="fw-bold fs-2 text-success">
+                            ${{ pago.total|floatformat:2 }}
                         </span>
                     </div>
 
-                    <div class="d-flex justify-content-center mb-4">
-                        <div class="border rounded-4 p-3 shadow-sm bg-white">
-                            <img
-                                src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TRANSFERENCIA_FICTICIA"
-                                alt="QR de transferencia"
-                                style="max-width: 220px; width: 100%; height: auto;"
-                            >
-                        </div>
+                    <div class="qr-wrapper mb-4">
+                        <img
+                            src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=TRANSFERENCIA_FICTICIA"
+                            alt="QR de transferencia"
+                            class="img-fluid"
+                        >
                     </div>
 
-                    <p class="text-muted mb-4">
-                        Una vez realizada la transferencia, confirma el pago para continuar
-                    </p>
+                    <div class="info-box mb-4">
+                        <p class="mb-1 fw-semibold">Instrucciones:</p>
+                        <ul class="mb-0 small text-muted">
+                            <li>Escanea el código QR con tu app bancaria</li>
+                            <li>Realiza la transferencia por el monto exacto</li>
+                            <li>Sube el comprobante para validar el pago</li>
+                        </ul>
+                    </div>
 
-                    <form method="post">
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <button type="submit"
-                                class="btn btn-success w-100 py-3 rounded-3 shadow-sm">
-                             Ya realicé el pago
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">
+                                Código del comprobante
+                            </label>
+                            <input
+                                type="text"
+                                name="codigo_comprobante"
+                                class="form-control form-control-lg"
+                                placeholder="Ej: TRX-987654"
+                                required
+                            >
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                Imagen del comprobante
+                            </label>
+                            <input
+                                type="file"
+                                name="foto_verificacion"
+                                class="form-control form-control-lg"
+                                accept="image/*"
+                                required
+                            >
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-success w-100 py-3 rounded-3 fw-bold shadow-sm">
+                            Confirmar pago
                         </button>
                     </form>
 
@@ -52,4 +87,27 @@
         </div>
     </div>
 </div>
+
+<style>
+.total-box {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 18px;
+}
+
+.qr-wrapper {
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    max-width: 260px;
+    margin: 0 auto;
+}
+
+.info-box {
+    background: #f1f3f5;
+    border-radius: 14px;
+    padding: 15px;
+}
+</style>
 {% endblock %}

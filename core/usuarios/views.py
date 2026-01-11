@@ -87,25 +87,37 @@ def editar_usuario(request, pk):
 
 @login_required
 def eliminar_usuario(request, pk):
-    """Eliminar un usuario si no tiene pedidos pendientes o enviados."""
     usuario = get_object_or_404(Usuario, pk=pk)
+
     pedidos_activos = Pedido.objects.filter(
-        cliente=usuario, estado__in=['pendiente', 'enviado']
+        cliente=usuario,
+        estado__in=["pendiente", "enviado"]
     )
+
     if pedidos_activos.exists():
-        if pedidos_activos.filter(estado='enviado').exists():
+        if pedidos_activos.filter(estado="enviado").exists():
             messages.error(
                 request,
-                "No se puede eliminar este usuario porque tiene pedidos sin entregar (enviados)."
+                "No se puede eliminar este usuario porque tiene pedidos sin entregar."
             )
         else:
             messages.error(
                 request,
-                "No se puede eliminar este usuario porque tiene pedidos por confirmar."
+                "No se puede eliminar este usuario porque tiene pedidos pendientes."
             )
         return redirect("usuarios:lista")
-    usuario.delete()
-    return render(request, "usuarios/confirmar_eliminar.html", {"usuario": usuario})
+
+    if request.method == "POST":
+        usuario.delete()
+        messages.success(request, "Usuario eliminado correctamente.")
+        return redirect("usuarios:lista")
+
+    return render(
+        request,
+        "usuarios/confirmar_eliminar.html",
+        {"usuario": usuario}
+    )
+
 
 def login_view(request):
     """Vista para login de usuarios."""

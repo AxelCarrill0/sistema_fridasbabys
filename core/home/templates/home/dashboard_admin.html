@@ -2,36 +2,96 @@
 {% block titulo %}Dashboard{% endblock %}
 
 {% block contenido %}
-<div class="container text-center mt-5">
-    <h2 class="mb-4">¡Bienvenido, {{ user.username }}!</h2>
-    <p class="lead mb-5">Gestion de operaciones principales .</p>
+<div class="container mt-4">
 
-    <div class="row justify-content-center">
-        <div class="col-md-5 mb-4">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body">
-                    <i class="fas fa-boxes fa-4x text-primary mb-3"></i>
-                    <h4 class="card-title text-primary fw-bold">Gestión de Productos</h4>
-                    <p class="card-text">Revisa y actualiza el inventario de productos de la tienda.</p>
-                    <a href="{% url 'productos:lista' %}" class="btn btn-primary mt-3">
-                        <i class="fas fa-arrow-right"></i> Ir a Productos
+    <div class="text-center mb-5">
+        <h2 class="fw-bold" style="font-family: 'Poppins', sans-serif;">
+            ¡Bienvenido, <span style="color:#2f3e46;">{{ user.username }}</span>!
+        </h2>
+        <p class="lead text-muted">
+            Gestión de las operaciones principales del sistema
+        </p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+
+        <div class="col-md-6 col-lg-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-primary">
+                        <i class="fas fa-boxes"></i>
+                    </div>
+
+                    <h4 class="card-title mt-4 fw-bold text-primary">
+                        Gestión de Productos
+                    </h4>
+
+                    <p class="card-text text-muted mt-2">
+                        Revisa, edita y controla el inventario de productos disponibles.
+                    </p>
+
+                    <a href="{% url 'productos:lista' %}" class="btn btn-primary btn-lg mt-3 px-4">
+                        Ir a Productos <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-5 mb-4">
-            <div class="card shadow-lg border-0 h-100">
-                <div class="card-body">
-                    <i class="fas fa-shopping-cart fa-4x text-success mb-3"></i>
-                    <h4 class="card-title text-success fw-bold">Confirmacion de Pedidos</h4>
-                    <p class="card-text">Nuevas compras realizadas por clientes.</p>
-                    <a href="{% url 'compras:lista' %}" class="btn btn-success mt-3">
-                        <i class="fas fa-arrow-right"></i> Ir a Compras
+        <div class="col-md-6 col-lg-5">
+            <div class="card dashboard-card h-100">
+                <div class="card-body text-center">
+                    <div class="icon-circle bg-success">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+
+                    <h4 class="card-title mt-4 fw-bold text-success">
+                        Confirmación de Pedidos
+                    </h4>
+
+                    <p class="card-text text-muted mt-2">
+                        Visualiza y gestiona las compras realizadas por los clientes.
+                    </p>
+
+                    <a href="{% url 'compras:lista' %}" class="btn btn-success btn-lg mt-3 px-4">
+                        Ir a Compras <i class="fas fa-arrow-right ms-1"></i>
                     </a>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
+
+<style>
+    .dashboard-card {
+        border: none;
+        border-radius: 22px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        background-color: #ffffff;
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 18px 40px rgba(0,0,0,0.18);
+    }
+
+    .icon-circle {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: #ffffff;
+        font-size: 36px;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+    }
+
+    .card-text {
+        font-size: 15px;
+    }
+</style>
+
 {% endblock contenido %}

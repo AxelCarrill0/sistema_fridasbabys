@@ -91,24 +91,25 @@ def editar_producto(request, pk):
 
 @login_required
 def eliminar_producto(request, pk):
-    """
-    Permite eliminar un producto.
-    """
     producto = get_object_or_404(Producto, pk=pk)
+
     if request.method == "POST":
         try:
             facade.eliminar_producto(pk)
             messages.success(
                 request,
-                f"El producto '{producto.nombre}' ha sido eliminado exitosamente."
+                f"El producto '{producto.nombre}' fue eliminado correctamente."
             )
         except ValueError as e:
             messages.error(request, str(e))
 
         return redirect("productos:lista")
 
-    return render(request, "productos/confirmar_eliminar.html", {"producto": producto})
-
+    return render(
+        request,
+        "productos/confirmar_eliminar.html",
+        {"producto": producto}
+    )
 
 def detalle_producto(request, pk):
     """

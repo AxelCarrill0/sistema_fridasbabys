@@ -2,82 +2,115 @@
 {% block titulo %}Editar Producto: {{ producto.nombre }}{% endblock %}
 
 {% block contenido %}
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-custom">
-  <div class="card shadow form-card border-0 p-4" style="max-width: 450px; width: 100%;">
-    <h2 class="text-center mb-4 text-dark fw-bold">Editar Producto</h2>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
 
-    <form method="post" enctype="multipart/form-data">
-      {% csrf_token %}
-      {% for field in form %}
-        <div class="mb-3">
-          <label for="{{ field.id_for_label }}" class="form-label fw-semibold text-dark">{{ field.label }}</label>
-          {{ field }}
-          {% if field.errors %}
-            <div class="text-danger small mt-1">{{ field.errors|join:", " }}</div>
-          {% endif %}
+            <div class="card shadow-lg border-0 form-card">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold title-form">Editar Producto</h2>
+                        <p class="text-muted mb-0">{{ producto.nombre }}</p>
+                    </div>
+
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        {% for field in form %}
+                            <div class="mb-3">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold label-form">
+                                    {{ field.label }}
+                                </label>
+
+                                {{ field }}
+
+                                {% if field.errors %}
+                                    <div class="text-danger small mt-1">
+                                        {{ field.errors|join:", " }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit fw-semibold">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center mt-3">
+                        <a href="{% url 'productos:lista' %}" class="back-link">
+                            ← Volver al listado
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
         </div>
-      {% endfor %}
-
-      <button type="submit" class="btn submit-button w-100 fw-semibold mt-3">
-        Guardar Cambios
-      </button>
-    </form>
-
-    <div class="text-center mt-3">
-      <a href="{% url 'productos:lista' %}" class="back-link">← Volver al listado</a>
     </div>
-  </div>
 </div>
 
 <style>
-  .bg-custom {
-    background-color: #a8dadc;
-  }
+/* CARD */
+.form-card {
+    border-radius: 18px;
+}
 
-  .form-card {
-    background-color: #fff;
-    border-radius: 15px;
-  }
+/* TÍTULO */
+.title-form {
+    color: #1d3557;
+    letter-spacing: 0.3px;
+}
 
-  input, select, textarea {
-    border-radius: 8px !important;
-    border: 1px solid #ccc !important;
-    padding: 10px !important;
+/* LABELS */
+.label-form {
+    color: #1d3557;
+    font-size: 0.9rem;
+}
+
+/* INPUTS */
+input, select, textarea {
+    border-radius: 12px !important;
+    border: 1px solid #cfd8dc !important;
+    padding: 10px 12px !important;
     width: 100%;
     font-size: 0.95rem;
-    transition: all 0.2s ease;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    border-color: #395278 !important;
-    box-shadow: 0 0 0 0.2rem rgb(29, 53, 87);
-  }
-
-  .submit-button {
-    background-color: #395278 !important; /* igual al botón Ingresar */
-    color: #1d3557 !important;
-    border: none;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 1rem;
     transition: all 0.25s ease;
-  }
+}
 
-  .submit-button:hover {
-    background-color: #395278 !important;
-    color: #fff !important;
-    transform: scale(1.03);
-  }
+input:focus, select:focus, textarea:focus {
+    border-color: #1d3557 !important;
+    box-shadow: 0 0 0 0.15rem rgba(29, 53, 87, 0.25);
+}
 
-  .back-link {
+/* BOTÓN */
+.btn-submit {
+    background-color: #1d3557;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    padding: 12px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-submit:hover {
+    background-color: #16304f;
+    transform: translateY(-2px);
+}
+
+/* LINK */
+.back-link {
     color: #1d3557;
     font-weight: 500;
     text-decoration: none;
-  }
+}
 
-  .back-link:hover {
-    color: #1d3557;
+.back-link:hover {
     text-decoration: underline;
-  }
+}
 </style>
 {% endblock %}

@@ -5,117 +5,110 @@
 
 {% block contenido %}
 <div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10">
-            <div class="card shadow-lg border-0 rounded-4">
 
-                <div class="card-header text-center py-3" style="background-color: #1d3557; color: #fff;">
-                    <h2 class="mb-0 fw-bold">{{ producto.nombre }}</h2>
-                </div>
+    <div class="detail-wrapper">
 
-                <div class="card-body p-5" style="background-color: #f6efe7;">
-                    <div class="row align-items-center">
+        <div class="detail-header">
+            <h1>{{ producto.nombre }}</h1>
+            <span class="badge-state {% if producto.activo %}active{% else %}inactive{% endif %}">
+                {{ producto.get_estado_display|default:"Disponible" }}
+            </span>
+        </div>
 
-                        <div class="col-md-5 text-center mb-4 mb-md-0">
-                            <div class="p-4 bg-white rounded-4 shadow-sm d-flex flex-column align-items-center">
-                                {% if producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}"
-                                         class="img-fluid rounded mb-3"
-                                         style="max-height: 280px; object-fit: contain; transition: transform 0.3s ease;"
-                                         onmouseover="this.style.transform='scale(1.05)'"
-                                         onmouseout="this.style.transform='scale(1)'">
+        <div class="detail-content">
 
-                                    <form action="{% url 'productos:subir_imagen' producto.id %}" method="post" enctype="multipart/form-data" class="d-flex flex-column align-items-center mt-2">
-                                        {% csrf_token %}
-                                        <input type="file" name="imagen" accept="image/*" class="form-control mb-2" style="max-width: 220px;">
-                                        <button type="submit" class="btn btn-brown btn-sm fw-semibold">Cambiar Imagen</button>
-                                    </form>
-                                {% else %}
-                                    <i class="fas fa-box fa-7x text-secondary mb-3"></i>
-                                    <p class="text-muted mb-3">Imagen no disponible</p>
+            <div class="image-panel">
+                {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                {% else %}
+                    <div class="no-image">
+                        <i class="fas fa-image"></i>
+                        <span>Sin imagen</span>
+                    </div>
+                {% endif %}
 
-                                    <form action="{% url 'productos:subir_imagen' producto.id %}" method="post" enctype="multipart/form-data" class="d-flex flex-column align-items-center mt-2">
-                                        {% csrf_token %}
-                                        <input type="file" name="imagen" accept="image/*" class="form-control mb-2" style="max-width: 220px;">
-                                        <button type="submit" class="btn btn-brown btn-sm fw-semibold">Agregar Imagen</button>
-                                    </form>
-                                {% endif %}
-                            </div>
+                <form action="{% url 'productos:subir_imagen' producto.id %}" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="file" name="imagen" accept="image/*" class="form-control form-control-sm">
+                    <button class="btn btn-brown btn-sm mt-2 w-100">Actualizar imagen</button>
+                </form>
+            </div>
+
+            <div class="info-panel">
+
+                <section class="section">
+                    <h3>Descripción</h3>
+                    <p>
+                        {{ producto.descripcion|default:"Este producto no cuenta con una descripción detallada." }}
+                    </p>
+                </section>
+
+                <section class="section price-box">
+
+                    {% if user.is_staff or user.is_superuser %}
+                        <div class="price-item">
+                            <span>Precio base</span>
+                            <strong>${{ producto.precio_base }}</strong>
                         </div>
 
-                        <div class="col-md-7">
-                            <h4 class="fw-bold text-brown mb-3">Descripción</h4>
-                            <p class="lead" style="color:#333; font-size: 1.15rem;">
-                                {{ producto.descripcion|default:"No hay descripción disponible para este producto." }}
-                            </p>
-
-                            <hr>
-
-                           <div class="price-section mb-4" style="font-size: 1.1rem;">
-
-                                {% if user.is_staff or user.is_superuser %}
-                                    <h6 class="fw-semibold text-muted">Precio Base:</h6>
-                                    <h3 class="fw-bold mb-2">${{ producto.precio_base }}</h3>
-
-                                    <h6 class="fw-semibold text-success mt-3">Precio con Ganancia Aplicada:</h6>
-                                    <h2 class="fw-bold text-success">${{ producto.precio_final }}</h2>
-
-                                    <div class="mt-2">
-                                        <small class="text-muted">Margen aplicado: {{ producto.ganancia }}%</small>
-                                    </div>
-
-                                {% else %}
-                                    <h6 class="text-muted mb-1 fw-semibold">Precio Base:</h6>
-                                    <h4 class="text-decoration-line-through text-secondary mb-2">${{ producto.precio_base }}</h4>
-
-                                    <h6 class="text-success mb-1 fw-semibold">Precio Promocional ({{ descuento_aplicado }}% Dcto):</h6>
-                                    <h2 class="text-success fw-bold mb-2">${{ precio_promocional }}</h2>
-
-                                    <span class="badge bg-warning text-dark fw-semibold">
-                                        ¡Ahorras ${{ ahorro|default:"0.00" }}!
-                                    </span>
-
-                                    <div class="mt-2">
-                                        <small class="text-muted">Ganancia aplicada: {{ producto.ganancia }}%</small>
-                                    </div>
-                                {% endif %}
-
-                            </div>
-
-
-                            <hr>
-
-                            <div class="details-grid mb-4">
-                                <div><strong>Stock:</strong>
-                                    <span class="badge bg-{% if producto.stock > 0 %}success{% else %}danger{% endif %}">
-                                        {{ producto.stock }} unidades
-                                    </span>
-                                </div>
-                                <div><strong>Categoría:</strong> {{ producto.get_categoria_display }}</div>
-                                <div><strong>Estado:</strong>
-                                    {% if producto.activo %}
-                                        <span class="badge bg-success">Activo</span>
-                                    {% else %}
-                                        <span class="badge bg-danger">Inactivo</span>
-                                    {% endif %}
-                                </div>
-                                <div><strong>Última Actualización:</strong>
-                                    {{ producto.fecha_actualizacion|date:"d M, Y H:i" }}
-                                </div>
-                            </div>
+                        <div class="price-item highlight">
+                            <span>Precio final</span>
+                            <strong>${{ producto.precio_final }}</strong>
                         </div>
-                    </div>
 
-                    <div class="mt-4 text-center">
-                        <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-brown btn-lg me-2 fw-semibold">
-                            Editar Producto
-                        </a>
+                        <small>Margen aplicado: {{ producto.ganancia }}%</small>
+                    {% else %}
+                        <div class="price-item old">
+                            <span>Precio normal</span>
+                            <strong>${{ producto.precio_base }}</strong>
+                        </div>
 
-                        <a href="{% url 'productos:lista' %}" class="btn btn-outline-brown btn-lg fw-semibold">
-                            Volver al Listado
-                        </a>
+                        <div class="price-item highlight">
+                            <span>Precio promocional</span>
+                            <strong>${{ precio_promocional }}</strong>
+                        </div>
+
+                        <span class="badge bg-warning text-dark mt-2">
+                            Ahorras ${{ ahorro|default:"0.00" }}
+                        </span>
+                    {% endif %}
+
+                </section>
+
+                <section class="section grid-info">
+                    <div>
+                        <span>Stock</span>
+                        <strong>{{ producto.stock }} unidades</strong>
                     </div>
+                    <div>
+                        <span>Categoría</span>
+                        <strong>{{ producto.get_categoria_display }}</strong>
+                    </div>
+                    <div>
+                        <span>Estado</span>
+                        <strong>
+                            {% if producto.activo %}
+                                Activo
+                            {% else %}
+                                Inactivo
+                            {% endif %}
+                        </strong>
+                    </div>
+                    <div>
+                        <span>Actualizado</span>
+                        <strong>{{ producto.fecha_actualizacion|date:"d M Y" }}</strong>
+                    </div>
+                </section>
+
+                <div class="action-bar">
+                    <a href="{% url 'productos:editar' producto.pk %}" class="btn btn-brown btn-lg">
+                        Editar
+                    </a>
+                    <a href="{% url 'productos:lista' %}" class="btn btn-outline-brown btn-lg">
+                        Volver
+                    </a>
                 </div>
+
             </div>
         </div>
     </div>
@@ -124,48 +117,147 @@
 <style>
 body {
     background-color: #a8dadc;
-    font-family: 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Poppins', 'Inter', sans-serif;
 }
 
-.text-brown { color: rgb(29, 53, 87); }
+.detail-wrapper {
+    background: #ffffff;
+    border-radius: 22px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0,0,0,.1);
+}
 
-.card { border-radius: 14px; }
-.price-section h4, .price-section h6 { line-height: 1.2; }
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 15px;
+    margin-bottom: 30px;
+}
 
-.details-grid {
+.detail-header h1 {
+    font-weight: 600;
+    color: #1d3557;
+    margin: 0;
+}
+
+.badge-state {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: .85rem;
+}
+
+.badge-state.active {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-state.inactive {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.detail-content {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    font-size: 1.1rem;
-    color: #444;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
 }
-.details-grid strong { color: rgb(29, 53, 87); }
+
+.image-panel {
+    background: #f9fafb;
+    border-radius: 18px;
+    padding: 20px;
+    text-align: center;
+}
+
+.image-panel img {
+    max-width: 100%;
+    max-height: 260px;
+    object-fit: contain;
+    margin-bottom: 15px;
+}
+
+.no-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    color: #9ca3af;
+    margin-bottom: 15px;
+}
+
+.no-image i {
+    font-size: 4rem;
+}
+
+.info-panel .section {
+    margin-bottom: 25px;
+}
+
+.section h3 {
+    color: #1d3557;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.price-box {
+    background: #f1f5f9;
+    border-radius: 14px;
+    padding: 15px;
+}
+
+.price-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.price-item.highlight strong {
+    color: #15803d;
+    font-size: 1.4rem;
+}
+
+.price-item.old strong {
+    text-decoration: line-through;
+    color: #6b7280;
+}
+
+.grid-info {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.grid-info span {
+    font-size: .8rem;
+    color: #6b7280;
+}
+
+.grid-info strong {
+    color: #1d3557;
+}
+
+.action-bar {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
 
 .btn-brown {
-    background-color: rgb(29, 53, 87);
+    background-color: #1d3557;
     color: white;
     border: none;
-    transition: all 0.3s ease;
-}
-.btn-brown:hover {
-    background-color: rgb(29, 53, 87);
-    color: white;
 }
 
 .btn-outline-brown {
-    border: 1px solid rgb(29, 53, 87);
-    color: rgb(29, 53, 87);
-    background-color: transparent;
-    transition: all 0.3s ease;
+    border: 1px solid #1d3557;
+    color: #1d3557;
 }
+
 .btn-outline-brown:hover {
     background-color: #1d3557;
     color: white;
 }
-
-.btn-lg {
-    border-radius: 8px;
-    padding: 10px 24px;
-}
 </style>
+
 {% endblock %}

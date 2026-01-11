@@ -2,28 +2,104 @@
 
 {% block contenido %}
 <div class="container my-5">
-    <div class="card shadow-lg border-0 rounded-4">
-        <div class="card-body p-4">
-            <h2 class="text-center mb-4">Editar Pedido #{{ pedido.id }}</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
 
-            <form method="post">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label for="producto" class="form-label">Producto</label>
-                    <input type="text" class="form-control" id="producto" value="{{ producto.nombre }}" disabled>
-                </div>
-                <div class="mb-3">
-                    <label for="cantidad" class="form-label">Cantidad</label>
-                    <input type="number" class="form-control" id="cantidad" name="cantidad" value="{{ pedido.cantidad }}" min="1" max="{{ producto.stock }}">
-                    <small class="text-muted">Stock disponible: {{ producto.stock }}</small>
-                </div>
-                <div class="d-flex justify-content-between">
-                    <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-secondary">Cancelar</a>
-                    <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
+                    <div class="text-center mb-4">
+                        <h2 class="fw-bold title-main">
+                            Editar Pedido
+                        </h2>
+                        <p class="text-muted mb-1">
+                            Pedido #{{ pedido.id }}
+                        </p>
+                        <div class="title-divider mx-auto mt-3"></div>
+                    </div>
 
+                    <form method="post">
+                        {% csrf_token %}
+
+                        <div class="mb-4">
+                            <label for="producto" class="form-label fw-semibold">
+                                Producto
+                            </label>
+                            <input type="text"
+                                   class="form-control form-control-lg input-soft"
+                                   id="producto"
+                                   value="{{ producto.nombre }}"
+                                   disabled>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="cantidad" class="form-label fw-semibold">
+                                Cantidad
+                            </label>
+                            <input type="number"
+                                   class="form-control form-control-lg input-soft"
+                                   id="cantidad"
+                                   name="cantidad"
+                                   value="{{ pedido.cantidad }}"
+                                   min="1"
+                                   max="{{ producto.stock }}">
+                            <small class="text-muted">
+                                Stock disponible: {{ producto.stock }}
+                            </small>
+                        </div>
+
+                        <div class="d-flex justify-content-between mt-5">
+                            <a href="{% url 'pedidos:lista_pedidos' %}"
+                               class="btn btn-outline-secondary btn-lg px-4">
+                                Cancelar
+                            </a>
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg px-4">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.title-main {
+    color: #1d3557;
+    letter-spacing: 0.6px;
+}
+
+.title-divider {
+    width: 70px;
+    height: 4px;
+    background: linear-gradient(90deg, #1d3557, #2a9d8f);
+    border-radius: 10px;
+}
+
+.input-soft {
+    border-radius: 12px;
+    border: 1px solid #dfe6ed;
+    transition: all 0.25s ease;
+}
+
+.input-soft:focus {
+    border-color: #1d3557;
+    box-shadow: 0 0 0 0.15rem rgba(29, 53, 87, 0.25);
+}
+
+.btn-primary {
+    background-color: #1d3557;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #16304f;
+}
+
+.btn-outline-secondary {
+    border-radius: 10px;
+}
+</style>
 {% endblock %}

@@ -57,7 +57,9 @@ class ProductoFacade:
         producto = self.obtener_producto(id_producto)
 
         if producto.pedido_set.exists():
-            raise Exception("No se puede eliminar el producto. Está relacionado con uno o más pedidos existentes.")
+            raise ValueError(
+                "No se puede eliminar el producto porque está vinculado a uno o más pedidos."
+            )
 
         producto.delete()
         return True

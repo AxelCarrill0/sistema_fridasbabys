@@ -3,25 +3,28 @@
 {% block contenido %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-7">
+        <div class="col-lg-8 col-md-10">
 
             <div class="card shadow-lg border-0 rounded-4">
                 <div class="card-body p-5">
 
-                    <h2 class="text-center fw-bold mb-2">
-                        Selecciona el método de pago
-                    </h2>
-                    <p class="text-center text-muted mb-4">
-                        Elige cómo deseas completar tu compra
-                    </p>
-
                     <div class="text-center mb-4">
-                        <span class="badge bg-light text-dark fs-6 px-4 py-2">
-                            Total a pagar:
-                            <strong class="ms-1">
+                        <h2 class="fw-bold payment-title mb-2">
+                            Método de Pago
+                        </h2>
+                        <p class="text-muted mb-0">
+                            Selecciona cómo deseas completar tu compra
+                        </p>
+                        <div class="divider mx-auto mt-3"></div>
+                    </div>
+
+                    <div class="text-center mb-5">
+                        <div class="total-box mx-auto">
+                            <span>Total a pagar</span>
+                            <strong class="d-block fs-3">
                                 ${{ pago.total|floatformat:2 }}
                             </strong>
-                        </span>
+                        </div>
                     </div>
 
                     <div class="row g-4">
@@ -31,13 +34,10 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="metodo" value="tarjeta">
 
-                                <button type="submit"
-                                        class="btn btn-primary w-100 p-4 rounded-3 shadow-sm">
-                                    <div class="fs-1 mb-2">💳</div>
-                                    <div class="fw-bold fs-5">Tarjeta</div>
-                                    <small class="opacity-75">
-                                        Pago inmediato y seguro
-                                    </small>
+                                <button type="submit" class="payment-card card-tarjeta">
+                                    <div class="icon">💳</div>
+                                    <h5>Tarjeta</h5>
+                                    <p>Pago inmediato y seguro</p>
                                 </button>
                             </form>
                         </div>
@@ -47,13 +47,10 @@
                                 {% csrf_token %}
                                 <input type="hidden" name="metodo" value="transferencia">
 
-                                <button type="submit"
-                                        class="btn btn-success w-100 p-4 rounded-3 shadow-sm">
-                                    <div class="fs-1 mb-2">🏦</div>
-                                    <div class="fw-bold fs-5">Transferencia</div>
-                                    <small class="opacity-75">
-                                        Escaneo de código QR
-                                    </small>
+                                <button type="submit" class="payment-card card-transferencia">
+                                    <div class="icon">🏦</div>
+                                    <h5>Transferencia</h5>
+                                    <p>Escaneo de código QR</p>
                                 </button>
                             </form>
                         </div>
@@ -61,8 +58,7 @@
                     </div>
 
                     <div class="text-center mt-5">
-                        <a href="{% url 'pedidos:lista_pedidos' %}"
-                           class="btn btn-outline-secondary px-4">
+                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-secondary px-4">
                             Cancelar
                         </a>
                     </div>
@@ -73,4 +69,71 @@
         </div>
     </div>
 </div>
+
+<style>
+.payment-title {
+    color: #1d3557;
+    letter-spacing: 0.5px;
+}
+
+.divider {
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #1d3557, #2a9d8f);
+    border-radius: 10px;
+}
+
+.total-box {
+    background-color: #f8f9fa;
+    border-radius: 16px;
+    padding: 18px 30px;
+    display: inline-block;
+    box-shadow: inset 0 0 0 1px #e0e0e0;
+}
+
+.total-box span {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.payment-card {
+    width: 100%;
+    border: none;
+    border-radius: 18px;
+    padding: 35px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+.payment-card h5 {
+    margin-top: 12px;
+    font-weight: 700;
+}
+
+.payment-card p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.payment-card .icon {
+    font-size: 3rem;
+}
+
+.card-tarjeta {
+    background: linear-gradient(135deg, #1d3557, #457b9d);
+    color: #fff;
+}
+
+.card-transferencia {
+    background: linear-gradient(135deg, #2a9d8f, #52b788);
+    color: #fff;
+}
+
+.payment-card:hover {
+    transform: translateY(-6px) scale(1.02);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+}
+</style>
 {% endblock %}

@@ -1,55 +1,100 @@
-{% extends "home/base.html" %} 
+{% extends "home/base.html" %}
 {% block titulo %}Eliminar Usuario{% endblock %}
 
 {% block contenido %}
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-6 col-lg-5">
-            <div class="card form-card shadow p-4 text-center">
-                <h1 class="card-title mb-4 form-title">Eliminar Usuario</h1>
-                
-                <p class="mb-4 lead">¿Estás seguro que quieres eliminar a <strong>"{{ usuario.nombre }}"</strong>?</p>
-                
-                <form method="post" class="d-grid gap-2">
-                    {% csrf_token %}
-                    <button type="submit" class="btn delete-button">Sí, eliminar</button>
-                    <a href="{% url 'usuarios:lista' %}" class="btn btn-secondary cancel-button">Cancelar</a>
-                </form>
+<div class="row justify-content-center align-items-center mt-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card delete-card text-center">
+            <div class="icon-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
             </div>
+
+            <h1 class="card-title mb-3 delete-title">
+                Eliminar Usuario
+            </h1>
+
+            <p class="delete-text mb-4">
+                ¿Estás seguro de que deseas eliminar al usuario
+                <strong>"{{ usuario.nombre }}"</strong>?
+                <br>
+                Esta acción no se puede deshacer.
+            </p>
+
+            <form method="post" class="d-grid gap-3">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-delete">
+                    Sí, eliminar usuario
+                </button>
+                <a href="{% url 'usuarios:lista' %}" class="btn btn-cancel">
+                    Cancelar
+                </a>
+            </form>
         </div>
     </div>
+</div>
 
-    <style>
-        .form-card {
-            background-color: #fff; 
-            border: none;
-            border-radius: 8px;
-        }
-        .form-title {
-            color: #dc3545;
-            font-weight: bold;
-        }
-        .delete-button {
-            background-color: #dc3545;
-            border-color: #dc3545;
-            color: white;
-        }
-        .delete-button:hover {
-            background-color: #c82333;
-            border-color: #c82333;
-            color: white;
-        }
-        .cancel-button {
-            background-color: #5d677a;
-            border-color: #5d677a;
-            color: white;
-        }
-        .cancel-button:hover {
-            background-color: #4a4e69;
-            border-color: #4a4e69;
-            color: white;
-        }
-        .lead {
-            color: #4a4e69;
-        }
-    </style>
+<style>
+.delete-card {
+    background-color: #ffffff;
+    border-radius: 22px;
+    padding: 40px 35px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.18);
+    border: none;
+}
+
+.icon-warning {
+    width: 70px;
+    height: 70px;
+    background-color: #f8d7da;
+    color: #dc3545;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 20px auto;
+}
+
+.delete-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    color: #dc3545;
+}
+
+.delete-text {
+    font-size: 16px;
+    color: #5f6f73;
+    line-height: 1.6;
+}
+
+.btn-delete {
+    background-color: #dc3545;
+    color: #ffffff;
+    border-radius: 25px;
+    padding: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-delete:hover {
+    background-color: #c82333;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(220,53,69,0.4);
+}
+
+.btn-cancel {
+    background-color: #2f3e46;
+    color: #ffffff;
+    border-radius: 25px;
+    padding: 10px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background-color: #354f52;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(47,62,70,0.4);
+}
+</style>
 {% endblock %}
