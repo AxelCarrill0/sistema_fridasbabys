@@ -10,7 +10,6 @@ from django.http import HttpResponse
 from django.conf import settings
 from django.core.files.base import ContentFile
 
-# Importaciones para ReportLab (PDF)
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Table, TableStyle, Spacer, Image
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
@@ -25,11 +24,7 @@ TASA_IVA = decimal.Decimal('0.15')
 
 
 def calcular_desglose_pedido(pedido):
-    """
-    Calcula valores y extrae datos del vendedor (Staff) correctamente.
-    """
     facade = ProductoFacade()
-    # Asegúrate de que esto devuelva la instancia del Modelo, no un diccionario
     producto = facade.obtener_producto(pedido.producto.id)
 
     precio_base_unitario = producto.precio_final
@@ -49,17 +44,13 @@ def calcular_desglose_pedido(pedido):
     cantidad = pedido.cantidad
     fila_subtotal = precio_neto_unitario * cantidad
 
-    # --- CORRECCIÓN NOMBRE VENDEDOR (STAFF) ---
-    # Usamos la relación 'creado_por' directamente
     autor = getattr(producto, 'creado_por', None)
 
     if autor:
-        # Intentamos obtener nombre y apellido
         nombre_completo = f"{autor.first_name} {autor.last_name}".strip()
         if nombre_completo:
             nombre_vendedor = nombre_completo
         else:
-            # Si no tiene nombre configurado, usamos el usuario
             nombre_vendedor = autor.username
     else:
         nombre_vendedor = "Admin / Sistema"
@@ -67,7 +58,7 @@ def calcular_desglose_pedido(pedido):
     return {
         'pedido': pedido,
         'producto': producto,
-        'nombre_vendedor': nombre_vendedor,  # <--- Dato corregido
+        'nombre_vendedor': nombre_vendedor,
         'cantidad': cantidad,
         'precio_base_unit': precio_base_unitario,
         'monto_desc_unit': monto_descuento_unitario,
@@ -139,7 +130,6 @@ def procesar_pago(request, pago_id):
                     data = ContentFile(base64.b64decode(imgstr), name=nombre_archivo)
 
                     pago.foto_verificacion = data
-                    # Guardamos ID de transacción automático para tarjeta si deseas
                     pago.codigo_comprobante = f"CARD-{pago.id}-{timezone.now().strftime('%H%M%S')}"
                     pago.save()
                     finalizar_pago(pago)
@@ -155,7 +145,7 @@ def procesar_pago(request, pago_id):
             imagen = request.FILES.get('foto_verificacion')
 
             if codigo and imagen:
-                pago.codigo_comprobante = codigo  # <--- AQUÍ SE GUARDA EL ID TRANSACCION
+                pago.codigo_comprobante = codigo
                 pago.foto_verificacion = imagen
                 pago.save()
                 finalizar_pago(pago)
@@ -232,9 +222,6 @@ def descargar_comprobante(request, pago_id):
     styles = getSampleStyleSheet()
     elementos = []
 
-    # ======================
-    # COLORES & ESTILOS
-    # ======================
     COLOR_PRIMARIO = colors.HexColor("#1d3557")
     COLOR_GRIS = colors.HexColor("#6c757d")
     COLOR_LINEA = colors.HexColor("#e5e5e5")
@@ -246,9 +233,6 @@ def descargar_comprobante(request, pago_id):
     title = ParagraphStyle('title', parent=styles['Heading1'], fontSize=15, textColor=COLOR_PRIMARIO,
                            alignment=TA_RIGHT)
 
-    # ======================
-    # HEADER
-    # ======================
     logo_path = os.path.join(settings.BASE_DIR, 'static/img/logo.png')
     logo = Image(logo_path, 48, 48) if os.path.exists(logo_path) else Spacer(1, 48)
 
@@ -264,9 +248,6 @@ def descargar_comprobante(request, pago_id):
     elementos.append(header)
     elementos.append(Spacer(1, 20))
 
-    # ======================
-    # INFO CLIENTE
-    # ======================
     nombre_cliente = f"{usuario.first_name} {usuario.last_name}".strip() or usuario.username
 
     info = [
@@ -279,9 +260,11 @@ def descargar_comprobante(request, pago_id):
 
     t_info = Table(info, colWidths=[70, 195, 70, 200])
     t_info.setStyle(TableStyle([
+        ('SPAN', (0, 0), (1, 0)),
+        ('SPAN', (2, 0), (3, 0)),
         ('LINEBELOW', (0, 0), (-1, 0), 1, COLOR_PRIMARIO),
-        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),  # Etiquetas col 1 negrita
-        ('FONTNAME', (2, 1), (2, -1), 'Helvetica-Bold'),  # Etiquetas col 3 negrita
+        ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
+        ('FONTNAME', (2, 1), (2, -1), 'Helvetica-Bold'),
         ('TEXTCOLOR', (0, 1), (0, -1), COLOR_GRIS),
         ('TEXTCOLOR', (2, 1), (2, -1), COLOR_GRIS),
         ('TOPPADDING', (0, 0), (-1, -1), 6),
@@ -290,15 +273,8 @@ def descargar_comprobante(request, pago_id):
     elementos.append(t_info)
     elementos.append(Spacer(1, 26))
 
-    # ======================
-    # 1. DEFINICIÓN DE ANCHOS (CLAVE PARA LA ALINEACIÓN)
-    # ======================
-    # Anchos: [Prod, Vend, Cant, Unit, Desc, Total]
     anchos_cols = [150, 95, 40, 75, 75, 100]
 
-    # ======================
-    # 2. TABLA DE PRODUCTOS
-    # ======================
     headers = ["Producto", "Vendedor", "Cant", "P. Unit", "Desc", "Subtotal"]
     data = [[Paragraph(h, bold) for h in headers]]
 
@@ -318,31 +294,22 @@ def descargar_comprobante(request, pago_id):
 
     t_prod = Table(data, colWidths=anchos_cols, repeatRows=1)
     t_prod.setStyle(TableStyle([
-        ('LINEBELOW', (0, 0), (-1, 0), 1, COLOR_PRIMARIO),  # Línea header
-        ('ALIGN', (2, 1), (2, -1), 'CENTER'),  # Cantidad Centrada
-        ('ALIGN', (3, 1), (-1, -1), 'RIGHT'),  # Precios a la derecha
+        ('LINEBELOW', (0, 0), (-1, 0), 1, COLOR_PRIMARIO),
+        ('ALIGN', (2, 1), (2, -1), 'CENTER'),
+        ('ALIGN', (3, 1), (-1, -1), 'RIGHT'),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
-        ('LINEBELOW', (0, 1), (-1, -1), 0.5, COLOR_LINEA),  # Líneas sutiles entre items
+        ('LINEBELOW', (0, 1), (-1, -1), 0.5, COLOR_LINEA),
     ]))
 
     elementos.append(t_prod)
 
-    # NOTA: No ponemos Spacer aquí o ponemos uno muy pequeño para que parezca la misma tabla
-    # elementos.append(Spacer(1, 0))
-
-    # ======================
-    # 3. TABLA DE TOTALES (ALINEADA PERFECTAMENTE)
-    # ======================
     iva = subtotal * TASA_IVA
     total = subtotal + iva
 
-    # Truco Matemático:
-    # Sumamos el ancho de las primeras 4 columnas para dejar ese espacio vacío a la izquierda
-    # 150 + 95 + 40 + 75 = 360
     ancho_vacio = sum(anchos_cols[:4])
-    ancho_etiqueta = anchos_cols[4]  # Corresponde a la columna 'Desc' (75)
-    ancho_valor = anchos_cols[5]  # Corresponde a la columna 'Subtotal' (100)
+    ancho_etiqueta = anchos_cols[4]
+    ancho_valor = anchos_cols[5]
 
     data_totales = [
         ["", "Subtotal:", f"${subtotal:.2f}"],
@@ -353,19 +320,15 @@ def descargar_comprobante(request, pago_id):
     t_totales = Table(data_totales, colWidths=[ancho_vacio, ancho_etiqueta, ancho_valor])
 
     t_totales.setStyle(TableStyle([
-        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),  # Alinear etiquetas y valores a la derecha
+        ('ALIGN', (1, 0), (-1, -1), 'RIGHT'),
         ('TOPPADDING', (0, 0), (-1, -1), 6),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
-        # Línea decorativa sobre el TOTAL FINAL (solo en las ultimas 2 columnas)
         ('LINEABOVE', (1, 2), (-1, 2), 1, COLOR_PRIMARIO),
-        ('TEXTCOLOR', (2, 2), (2, 2), COLOR_PRIMARIO),  # Color azul para el monto total
+        ('TEXTCOLOR', (2, 2), (2, 2), COLOR_PRIMARIO),
     ]))
 
     elementos.append(t_totales)
 
-    # ======================
-    # FOOTER
-    # ======================
     elementos.append(Spacer(1, 40))
     elementos.append(Paragraph(
         "Gracias por comprar en Frida's Babys. Documento generado automáticamente por el sistema.",

@@ -42,6 +42,10 @@
                                 <span class="badge role-admin">
                                     <i class="fa-solid fa-shield-halved"></i> Admin
                                 </span>
+                            {% elif u.rol == "vendedor" %}
+                                <span class="badge role-vendedor">
+                                    <i class="fa-solid fa-shop"></i> Vendedor
+                                </span>
                             {% else %}
                                 <span class="badge role-client">
                                     <i class="fa-solid fa-user"></i> Cliente
@@ -154,6 +158,11 @@ table tbody tr:hover {
 .role-admin {
     background-color: #e0e7ff;
     color: #3730a3;
+}
+
+.role-vendedor {
+    background-color: #ffedd5;
+    color: #9a3412;
 }
 
 .role-client {
