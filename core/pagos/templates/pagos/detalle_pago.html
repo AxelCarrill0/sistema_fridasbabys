@@ -4,83 +4,146 @@
 {% block contenido %}
 <div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-lg-10 col-md-12">
-
-            <div class="card shadow border-0 rounded-4">
-                <div class="card-header bg-white border-0 pt-4 px-5 text-center">
-                    <h3 class="fw-bold text-primary">Comprobante de Pago</h3>
-                    <p class="text-muted">Frida’s Babys S.A.</p>
+        <div class="col-lg-11 col-md-12">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+                <div class="bg-primary text-white text-center py-4" style="background-color: #1d3557 !important;">
+                    <h3 class="fw-bold mb-1">¡Pago Exitoso!</h3>
+                    <p class="mb-0 opacity-75">Gracias por confiar en Frida's Babys</p>
                 </div>
 
-                <div class="card-body px-5 pb-5">
+                <div class="card-body px-5 py-5">
 
-                    <div class="row mb-4 border-bottom pb-3">
-                        <div class="col-md-6">
-                            <h6 class="text-uppercase text-muted fw-bold small">Datos del Cliente</h6>
-                            <p class="mb-0 fw-bold">{{ pago.usuario.first_name }} {{ pago.usuario.last_name }}</p>
-                            <p class="mb-0 small text-muted">{{ pago.usuario.email }}</p>
+                    <div class="row mb-5 gx-5">
+                        <div class="col-md-6 border-end border-light">
+                            <h6 class="text-uppercase text-primary fw-bold mb-3 small" style="color: #1d3557 !important;">
+                                <i class="fas fa-user-circle me-2"></i>Datos del Cliente
+                            </h6>
+                            <div class="ps-3">
+                                <p class="mb-1 fs-5 fw-bold text-dark">
+                                    {# CORRECCIÓN: Si first_name está vacío, muestra username #}
+                                    {% if pago.usuario.first_name %}
+                                        {{ pago.usuario.first_name }} {{ pago.usuario.last_name }}
+                                    {% else %}
+                                        {{ pago.usuario.username }}
+                                    {% endif %}
+                                </p>
+                                <p class="mb-1 text-muted">
+                                    <i class="fas fa-envelope me-2 w-20"></i>{{ pago.usuario.email }}
+                                </p>
+                                {% if pago.usuario.telefono %}
+                                <p class="mb-1 text-muted">
+                                    <i class="fas fa-phone me-2 w-20"></i>{{ pago.usuario.telefono }}
+                                </p>
+                                {% endif %}
+                                {% if pago.usuario.direccion %}
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-map-marker-alt me-2 w-20"></i>{{ pago.usuario.direccion }}
+                                </p>
+                                {% else %}
+                                <p class="mb-0 text-muted">
+                                    <i class="fas fa-map-marker-alt me-2 w-20"></i>Sin dirección registrada
+                                </p>
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="col-md-6 text-md-end">
-                            <h6 class="text-uppercase text-muted fw-bold small">Detalles del Pago</h6>
-                            <p class="mb-0"><strong>N°:</strong> #{{ pago.id }}</p>
-                            <p class="mb-0"><strong>Fecha:</strong> {{ pago.fecha_pago|date:"d/m/Y H:i" }}</p>
-                            <span class="badge bg-success">PAGADO CON {{ pago.get_metodo_pago_display|upper }}</span>
+
+                        <div class="col-md-6 ps-md-5">
+                            <h6 class="text-uppercase text-primary fw-bold mb-3 small" style="color: #1d3557 !important;">
+                                <i class="fas fa-file-invoice-dollar me-2"></i>Detalles del Comprobante
+                            </h6>
+                            <div class="ps-3">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">N° Orden:</span>
+                                    <span class="fw-bold">#{{ pago.id }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Fecha de Pago:</span>
+                                    <span class="fw-bold">{{ pago.fecha_pago|date:"d/m/Y H:i" }}</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-2">
+                                    <span class="text-muted">Método:</span>
+                                    <span class="badge bg-success text-uppercase">{{ pago.get_metodo_pago_display }}</span>
+                                </div>
+
+                                <div class="d-flex justify-content-between">
+                                    <span class="text-muted">ID Transacción:</span>
+                                    {# CORRECCIÓN: Mostramos N/A si no hay código #}
+                                    <span class="font-monospace text-dark">{{ pago.codigo_comprobante|default:"N/A" }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light small">
-                                <tr class="text-center text-uppercase">
-                                    <th class="text-start">Producto</th>
-                                    <th>Vendedor</th>
-                                    <th>Cant.</th>
-                                    <th>P. Base</th>
-                                    <th>Desc.</th>
-                                    <th>IVA (15%)</th>
-                                    <th class="text-end">Total</th>
+                        <table class="table table-borderless align-middle">
+                            <thead class="bg-light small text-uppercase text-muted">
+                                <tr>
+                                    <th class="ps-4 py-3">Producto</th>
+                                    <th class="py-3">Staff / Vendedor</th>
+                                    <th class="text-center py-3">Cant.</th>
+                                    <th class="text-end py-3">P. Base</th>
+                                    <th class="text-end py-3">Desc.</th>
+                                    <th class="text-end pe-4 py-3">Subtotal</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="border-bottom">
                                 {% for item in detalles %}
-                                <tr class="text-center">
-                                    <td class="text-start">
-                                        <span class="fw-bold d-block">{{ item.producto.nombre }}</span>
+                                <tr>
+                                    <td class="ps-4 py-3">
+                                        <div class="d-flex align-items-center">
+                                            {% if item.producto.imagen %}
+                                                <img src="{{ item.producto.imagen.url }}" alt="img"
+                                                     class="rounded-3 me-3" style="width: 40px; height: 40px; object-fit: cover;">
+                                            {% else %}
+                                                <div class="rounded-3 me-3 bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                                     style="width: 40px; height: 40px;">
+                                                    <i class="fas fa-box text-muted"></i>
+                                                </div>
+                                            {% endif %}
+                                            <span class="fw-semibold text-dark">{{ item.producto.nombre }}</span>
+                                        </div>
                                     </td>
-                                    <td class="small text-muted">
-                                        <i class="fas fa-user-tag"></i> {{ item.vendedor.username }}
+                                    <td class="text-muted small">
+                                        {# CORRECCIÓN: Usamos la variable que viene de la vista #}
+                                        <i class="fas fa-id-badge me-1 text-secondary"></i>
+                                        {{ item.nombre_vendedor }}
                                     </td>
-                                    <td>{{ item.cantidad }}</td>
-                                    <td>${{ item.precio_base_unit|floatformat:2 }}</td>
-                                    <td class="text-danger">-${{ item.monto_desc_unit|floatformat:2 }}</td>
-                                    <td class="text-muted">${{ item.monto_iva_unit|floatformat:2 }}</td>
-                                    <td class="fw-bold text-end">${{ item.precio_final_unit|floatformat:2 }}</td>
+                                    <td class="text-center">{{ item.cantidad }}</td>
+                                    <td class="text-end text-muted">${{ item.precio_base_unit|floatformat:2 }}</td>
+                                    <td class="text-end text-danger">
+                                        {% if item.monto_desc_unit > 0 %}
+                                            -${{ item.monto_desc_unit|floatformat:2 }}
+                                        {% else %}
+                                            -
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-end fw-bold pe-4 text-dark">${{ item.fila_subtotal|floatformat:2 }}</td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
-                            <tfoot class="border-top">
+                            <tfoot class="bg-light">
                                 <tr>
-                                    <td colspan="6" class="text-end text-muted">Subtotal (Sin IVA):</td>
-                                    <td class="text-end">${{ subtotal|floatformat:2 }}</td>
+                                    <td colspan="5" class="text-end pt-4 pb-1 text-muted">Subtotal (Sin IVA):</td>
+                                    <td class="text-end pt-4 pb-1 pe-4">${{ subtotal|floatformat:2 }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="6" class="text-end text-muted">Total IVA (15%):</td>
-                                    <td class="text-end">${{ total_iva|floatformat:2 }}</td>
+                                    <td colspan="5" class="text-end py-1 text-muted">IVA (15%):</td>
+                                    <td class="text-end py-1 pe-4">${{ total_iva|floatformat:2 }}</td>
                                 </tr>
-                                <tr class="bg-light">
-                                    <td colspan="6" class="text-end fw-bold fs-5">TOTAL PAGADO:</td>
-                                    <td class="text-end fw-bold fs-5 text-success">${{ pago.total|floatformat:2 }}</td>
+                                <tr>
+                                    <td colspan="5" class="text-end pb-4 pt-2 fw-bold fs-5 text-dark">TOTAL PAGADO:</td>
+                                    <td class="text-end pb-4 pt-2 pe-4 fw-bold fs-5 text-success">${{ pago.total|floatformat:2 }}</td>
                                 </tr>
                             </tfoot>
                         </table>
                     </div>
 
-                    <div class="text-center mt-5 d-flex justify-content-center gap-3">
-                        <a href="{% url 'pagos:descargar_comprobante' pago.id %}" class="btn btn-primary px-4 rounded-pill">
-                             <i class="fas fa-file-pdf me-2"></i> Descargar PDF Oficial
+                    <div class="d-flex justify-content-center gap-3 mt-5">
+                        <a href="{% url 'pagos:descargar_comprobante' pago.id %}" class="btn btn-dark px-4 py-2 rounded-3 shadow-sm" style="background-color: #1d3557; border: none;">
+                             <i class="fas fa-file-pdf me-2"></i> Descargar Factura PDF
                         </a>
-                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-secondary px-4 rounded-pill">
-                            Volver al Inicio
+                        <a href="{% url 'pedidos:lista_pedidos' %}" class="btn btn-outline-primary px-4 py-2 rounded-3" style="color: #1d3557; border-color: #1d3557;">
+                            <i class="fas fa-shopping-bag me-2"></i> Volver a Mis Pedidos
                         </a>
                     </div>
 
@@ -90,4 +153,10 @@
         </div>
     </div>
 </div>
+
+<style>
+    .w-20 { width: 20px; text-align: center; }
+    .table > :not(caption) > * > * { border-bottom-width: 0; }
+    .border-end { border-color: #eee !important; }
+</style>
 {% endblock %}

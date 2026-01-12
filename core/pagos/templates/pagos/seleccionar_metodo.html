@@ -41,24 +41,37 @@
 
                     <div class="collapse mb-4" id="resumenCompra">
                         <div class="table-responsive">
-                            <table class="table table-sm table-borderless">
-                                <thead class="text-muted border-bottom">
+                            <table class="table table-sm table-borderless align-middle">
+                                <thead class="text-muted border-bottom small">
                                     <tr>
                                         <th>Prod.</th>
-                                        <th class="text-end">P. Base</th>
-                                        <th class="text-end">Desc.</th>
-                                        <th class="text-end">IVA</th>
+                                        <th class="text-center">Cant.</th>
+                                        <th class="text-end">P. Unit. (Neto)</th>
                                         <th class="text-end fw-bold">Total</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for item in pedidos_detalle %}
                                     <tr>
-                                        <td>{{ item.producto.nombre }} <small class="text-muted">x{{ item.cantidad }}</small></td>
-                                        <td class="text-end">${{ item.precio_base_unit|floatformat:2 }}</td>
-                                        <td class="text-end text-danger">-${{ item.monto_desc_unit|floatformat:2 }}</td>
-                                        <td class="text-end">${{ item.monto_iva_unit|floatformat:2 }}</td>
-                                        <td class="text-end fw-bold">${{ item.precio_final_unit|floatformat:2 }}</td>
+                                        <td>
+                                            <span class="fw-semibold text-dark">{{ item.producto.nombre }}</span>
+                                            <br>
+                                            <small class="text-muted" style="font-size: 0.75rem;">
+                                                Base: ${{ item.precio_base_unit|floatformat:2 }}
+                                                {% if item.monto_desc_unit > 0 %}
+                                                    <span class="text-danger ms-1">| Desc: -${{ item.monto_desc_unit|floatformat:2 }}</span>
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                        <td class="text-center">x{{ item.cantidad }}</td>
+
+                                        <td class="text-end text-muted">
+                                            ${{ item.precio_final_unit|floatformat:2 }}
+                                        </td>
+
+                                        <td class="text-end fw-bold text-dark">
+                                            ${{ item.fila_subtotal|floatformat:2 }}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>

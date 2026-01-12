@@ -1,10 +1,4 @@
-"""
-Vistas de la aplicación Pedidos.
-Gestiona listado, edición, cancelación y confirmación de pedidos.
-"""
-
 import decimal
-
 from django.db import transaction
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -18,11 +12,6 @@ from core.pagos.models import Pago
 
 @login_required
 def lista_pedidos(request):
-    """
-    Lista los pedidos del usuario.
-    Si el usuario es staff, lista todos los pedidos.
-    Calcula subtotal y precio final con decorador de descuento.
-    """
     facade = ProductoFacade()
 
     if request.user.is_staff:
@@ -36,17 +25,23 @@ def lista_pedidos(request):
 
     for pedido in pedidos:
         producto = facade.obtener_producto(pedido.producto.id)
-        componente = ProductoComponent(producto)
-        descuento = decimal.Decimal('10')
-        producto_decorado = DescuentoPorcentajeDecorator(componente, descuento)
-        precio_final = producto_decorado.get_precio_final()
+
+        descuento_valor = getattr(producto, 'descuento', 0)
+        precio_final = producto.precio_final
+
+        if descuento_valor > 0:
+            componente = ProductoComponent(producto)
+            descuento_decimal = decimal.Decimal(str(descuento_valor))
+            producto_decorado = DescuentoPorcentajeDecorator(componente, descuento_decimal)
+            precio_final = producto_decorado.get_precio_final()
+
         subtotal = precio_final * pedido.cantidad
 
         detalle = {
             'pedido': pedido,
             'precio_final': precio_final,
             'subtotal': subtotal,
-            'descuento': descuento
+            'descuento': descuento_valor
         }
 
         if pedido.estado == 'pendiente':
@@ -66,10 +61,6 @@ def lista_pedidos(request):
 
 @login_required
 def agregar_a_pedido(request):
-    """
-    Agrega un producto al pedido del usuario.
-    Controla stock y cantidades existentes.
-    """
     if request.method == 'POST':
         producto_id = request.POST.get('producto_id')
         try:
@@ -131,10 +122,6 @@ def agregar_a_pedido(request):
 
 @login_required
 def editar_pedido(request, pedido_id):
-    """
-    Edita la cantidad de un pedido pendiente.
-    Controla stock y cantidad mínima.
-    """
     pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user)
     producto = pedido.producto
 
@@ -167,9 +154,6 @@ def editar_pedido(request, pedido_id):
 
 @login_required
 def cancelar_pedido(request, pedido_id):
-    """
-    Cancela un pedido del usuario.
-    """
     pedido = get_object_or_404(Pedido, id=pedido_id, cliente=request.user)
     pedido.delete()
     messages.success(request, f"Pedido #{pedido.id} cancelado correctamente.")
@@ -184,7 +168,6 @@ def confirmar_compra(request):
 
     user = request.user
 
-    # 1. Obtenemos TODOS los pedidos pendientes (nuevos y viejos)
     pedidos = Pedido.objects.filter(
         cliente=user,
         estado='pendiente'
@@ -194,36 +177,35 @@ def confirmar_compra(request):
         messages.warning(request, "No tienes pedidos pendientes para confirmar.")
         return redirect('pedidos:lista_pedidos')
 
-    # 2. Recalculamos el TOTAL de todo lo que hay en el carrito ahora mismo
     facade = ProductoFacade()
     total = decimal.Decimal('0.00')
 
     for pedido in pedidos:
         producto = facade.obtener_producto(pedido.producto.id)
-        componente = ProductoComponent(producto)
-        descuento = decimal.Decimal('10')
-        producto_decorado = DescuentoPorcentajeDecorator(componente, descuento)
-        precio_final = producto_decorado.get_precio_final()
+
+        descuento_valor = getattr(producto, 'descuento', 0)
+        precio_final = producto.precio_final
+
+        if descuento_valor > 0:
+            componente = ProductoComponent(producto)
+            descuento_decimal = decimal.Decimal(str(descuento_valor))
+            producto_decorado = DescuentoPorcentajeDecorator(componente, descuento_decimal)
+            precio_final = producto_decorado.get_precio_final()
+
         total += precio_final * pedido.cantidad
 
-    # 3. Buscamos si ya existe un pago pendiente o creamos uno nuevo
     pago = Pago.objects.filter(usuario=user, estado='pendiente').first()
 
     if pago:
-        # Si ya existe, actualizamos el total con los nuevos productos
         pago.total = total
         pago.save()
     else:
-        # Si no existe, lo creamos
         pago = Pago.objects.create(
             usuario=user,
             total=total,
             estado='pendiente'
         )
 
-    # 4. VINCULACIÓN CRÍTICA:
-    # Asignamos este pago a TODOS los pedidos pendientes encontrados.
-    # Esto arregla el problema de que no aparezcan.
     pedidos.update(pago=pago)
 
     messages.success(request, "Compra confirmada. Selecciona el método de pago.")
